@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import type { Role } from '@/store/auth';
 
-const mockUsers = [
+const mockUsers: any[] = [
   { id: 'user-1', name: '李明', role: 'admin', avatar: 'https://placehold.co/40x40.png', initials: 'LM' },
   { id: 'user-2', name: '创新科技', role: 'supplier', avatar: 'https://placehold.co/40x40.png', initials: '创' },
   { id: 'user-3', name: '王芳', role: 'creator', avatar: 'https://placehold.co/40x40.png', initials: 'WF' },
