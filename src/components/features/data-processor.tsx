@@ -76,16 +76,16 @@ export function DataProcessor() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center p-2 border rounded-md bg-secondary w-full sm:w-auto sm:flex-grow">
+            <div className="flex items-center p-2 border rounded-md bg-secondary/50 w-full sm:flex-grow">
                 <FileText className="h-5 w-5 mr-2 text-muted-foreground"/>
                 <span className="text-sm text-muted-foreground truncate">{file ? file.name : '未选择文件'}</span>
             </div>
             <div className="flex gap-4">
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <Button variant="outline" asChild={false}>
-                  <div>
+               <label htmlFor="file-upload" className="cursor-pointer">
+                <Button variant="outline" asChild>
+                   <div>
                     <UploadCloud className="mr-2 h-4 w-4" /> 上传 CSV
-                  </div>
+                   </div>
                 </Button>
                 <Input id="file-upload" type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
               </label>
