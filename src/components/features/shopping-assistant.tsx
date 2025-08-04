@@ -12,9 +12,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { getProductRecommendations, type ProductRecommendationsOutput } from '@/ai/flows/product-recommendations';
+import { generateUserProfile, type UserProfile } from '@/ai/flows/generate-user-profile';
 import { Loader2, Image as ImageIcon, Search, Sparkles, Tags, User } from 'lucide-react';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '../ui/badge';
 
 const formSchema = z.object({
   description: z.string().min(10, { message: '请至少输入10个字符。' }),
@@ -38,9 +40,11 @@ const fileToDataUri = (file: File): Promise<string> => {
 };
 
 export function ShoppingAssistant() {
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [recommendations, setRecommendations] = useState<ProductRecommendationsOutput['recommendations']>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isLoadingRecs, setIsLoadingRecs] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { toast } = useToast();
@@ -52,8 +56,10 @@ export function ShoppingAssistant() {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
+    setIsLoadingProfile(true);
+    setIsLoadingRecs(true);
+    setUserProfile(null);
     setRecommendations([]);
-    setShowUserProfile(false);
 
     try {
       let imageDataUri: string | undefined = undefined;
@@ -61,15 +67,22 @@ export function ShoppingAssistant() {
         imageDataUri = await fileToDataUri(data.image);
       }
 
-      const result = await getProductRecommendations({ 
+      // 1. Generate User Profile
+      const profile = await generateUserProfile({
         description: data.description,
+        photoDataUri: imageDataUri
+      });
+      setUserProfile(profile);
+      setIsLoadingProfile(false);
+
+      // 2. Get Recommendations based on profile
+      const result = await getProductRecommendations({ 
+        userProfile: profile,
         photoDataUri: imageDataUri 
       });
       
       setRecommendations(result.recommendations);
-      if (result.recommendations.length > 0) {
-        setShowUserProfile(true);
-      }
+
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -79,8 +92,13 @@ export function ShoppingAssistant() {
       console.error(error);
     } finally {
       setIsLoading(false);
+      setIsLoadingProfile(false);
+      setIsLoadingRecs(false);
     }
   };
+  
+  const showResults = isLoading || userProfile || recommendations.length > 0;
+
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -124,6 +142,9 @@ export function ShoppingAssistant() {
                                     if (file) {
                                       field.onChange(file);
                                       setImagePreview(URL.createObjectURL(file));
+                                    } else {
+                                      field.onChange(undefined);
+                                      setImagePreview(null);
                                     }
                                   }}
                                 />
@@ -150,9 +171,8 @@ export function ShoppingAssistant() {
         </CardContent>
       </Card>
       
-      {(isLoading || showUserProfile) && (
+      {showResults && (
         <div className='space-y-8'>
-          {/* User Profile Card Skeleton/Display */}
           <Card>
             <CardHeader>
               <div className='flex items-center gap-2'>
@@ -162,39 +182,35 @@ export function ShoppingAssistant() {
               <CardDescription>AI 根据您的需求生成的初步画像。</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isLoading ? (
+              {isLoadingProfile ? (
                 <>
                   <Skeleton className="h-6 w-3/4" />
-                  <div className="flex gap-2">
-                    <Skeleton className="h-6 w-24" />
-                    <Skeleton className="h-6 w-20" />
-                    <Skeleton className="h-6 w-28" />
+                  <div className="flex flex-wrap gap-2">
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                    <Skeleton className="h-6 w-28 rounded-full" />
                   </div>
                 </>
-              ) : (
+              ) : userProfile ? (
                 <>
                   <div>
                     <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent"/>画像总结</h3>
-                    <p className="text-muted-foreground mt-1">一位注重生活品质的都市用户，寻找兼具设计感与实用性的徒步鞋，偏好防水功能和舒适体验。</p>
+                    <p className="text-muted-foreground mt-1">{userProfile.summary}</p>
                   </div>
                   <div>
                     <h3 className="font-semibold flex items-center gap-2"><Tags className="h-4 w-4 text-accent"/>关键词标签</h3>
                     <div className="flex flex-wrap gap-2 mt-2">
-                        <Badge variant="outline">徒步鞋</Badge>
-                        <Badge variant="outline">防水</Badge>
-                        <Badge variant="outline">舒适</Badge>
-                        <Badge variant="outline">夏季</Badge>
+                        {userProfile.tags.map(tag => <Badge key={tag} variant="outline">{tag}</Badge>)}
                     </div>
                   </div>
                 </>
-              )}
+              ) : null}
             </CardContent>
           </Card>
           
-          {/* Recommendations Skeleton/Display */}
           <div>
              <h2 className="text-2xl font-bold mb-4 text-center">为您推荐</h2>
-             {isLoading ? (
+             {isLoadingRecs ? (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  {[...Array(3)].map((_, i) => (
                    <Card key={i}>
