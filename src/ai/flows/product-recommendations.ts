@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -13,6 +14,7 @@ import {z} from 'genkit';
 
 const ProductRecommendationsInputSchema = z.object({
   description: z.string().describe('The description of the desired product or service.'),
+  photoDataUri: z.string().optional().describe("An optional photo of a product, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type ProductRecommendationsInput = z.infer<typeof ProductRecommendationsInputSchema>;
 
@@ -39,8 +41,11 @@ const prompt = ai.definePrompt({
   prompt: `You are a helpful shopping assistant. A user will provide a description of what they are looking for, and you should provide a list of product or service recommendations.
 
 Description: {{{description}}}
+{{#if photoDataUri}}
+Image: {{media url=photoDataUri}}
+{{/if}}
 
-Please provide a list of recommendations based on the description. Include a name, description, optional image URL and optional link for each recommendation.
+Please provide a list of recommendations based on the description and optional image. Include a name, description, optional image URL and optional link for each recommendation.
 
 Your output should be a JSON object that follows this schema: ${JSON.stringify(ProductRecommendationsOutputSchema.shape)}`,
 });
@@ -56,3 +61,4 @@ const productRecommendationsFlow = ai.defineFlow(
     return output!;
   }
 );
+
