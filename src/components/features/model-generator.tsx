@@ -46,48 +46,44 @@ export function ModelGenerator() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>AI 3D 模型生成</CardTitle>
-        <CardDescription>输入文本描述，生成3D模型预览。</CardDescription>
-      </CardHeader>
-      <CardContent className="grid md:grid-cols-2 gap-8 items-start">
-        <div className="space-y-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>模型描述</FormLabel>
-                    <FormControl>
-                      <Input placeholder="例如：一个红色的复古跑车" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading} className="bg-accent text-accent-foreground hover:bg-accent/90">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                生成模型
-              </Button>
-            </form>
-          </Form>
-        </div>
-        <div className="flex items-center justify-center border-dashed border-2 rounded-lg p-4 aspect-square bg-muted/50 min-h-[300px] md:min-h-full">
-          {isLoading && <Loader2 className="h-12 w-12 animate-spin text-primary" />}
-          {!isLoading && modelUri && (
-            <Image src={modelUri} alt="生成的3D模型" width={512} height={512} className="object-contain max-h-full max-w-full" />
-          )}
-          {!isLoading && !modelUri && (
-            <div className="text-center text-muted-foreground">
-              <Wand2 className="mx-auto h-12 w-12 mb-4" />
-              <p>您的模型将显示在这里</p>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid md:grid-cols-2 gap-8 items-start">
+      <div className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>模型描述</FormLabel>
+                  <FormControl>
+                    <Input placeholder="例如：一个红色的复古跑车" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" disabled={isLoading} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+              生成模型
+            </Button>
+          </form>
+        </Form>
+      </div>
+      <div className="flex items-center justify-center border-dashed border-2 rounded-lg p-4 aspect-square bg-muted/50 min-h-[300px] md:min-h-full">
+        {isLoading && <Loader2 className="h-12 w-12 animate-spin text-primary" />}
+        {!isLoading && modelUri && (
+          <Image src={modelUri} alt="生成的3D模型" width={512} height={512} className="object-contain max-h-full max-w-full rounded-lg" />
+        )}
+        {!isLoading && !modelUri && (
+          <div className="text-center text-muted-foreground">
+            <Wand2 className="mx-auto h-12 w-12 mb-4" />
+            <p>您的模型将显示在这里</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
+
+    

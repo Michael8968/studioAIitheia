@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { CheckCircle, Clock, FileText, Gift, Lightbulb, Palette } from 'lucide-react';
+import { CheckCircle, Clock, FileText, Gift, Lightbulb, Palette, Wand2 } from 'lucide-react';
 
 
 const mockCreators = [
@@ -120,7 +120,7 @@ export default function CreatorWorkbenchPage() {
           <h1 className="text-3xl font-bold">创意者工作台</h1>
           <p className="text-muted-foreground">管理您的任务、需求和创作。</p>
         </div>
-         <div className="flex items-center gap-4">
+         <div className="flex items-center gap-4 w-full sm:w-auto">
           <Select value={selectedCreatorId} onValueChange={handleCreatorChange}>
             <SelectTrigger className="w-full sm:w-[280px]">
               <SelectValue placeholder="选择一个创作者...">
@@ -171,7 +171,7 @@ export default function CreatorWorkbenchPage() {
             <CardContent className="space-y-4">
              {creator.tasks.length > 0 ? (
                 creator.tasks.map(task => (
-                    <div key={task.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                    <div key={task.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg hover:bg-secondary/80 transition-colors">
                         <p className="font-medium">{task.title}</p>
                         <Badge variant={statusVariantMap[task.status]}>{task.status}</Badge>
                     </div>
@@ -193,7 +193,7 @@ export default function CreatorWorkbenchPage() {
                 creator.demands.map(demand => {
                     const Icon = categoryIconMap[demand.category] || FileText;
                     return (
-                        <Card key={demand.id}>
+                        <Card key={demand.id} className="hover:shadow-md transition-shadow">
                             <CardHeader>
                                 <CardTitle className="text-lg">{demand.title}</CardTitle>
                                 <div className="flex items-center gap-2 text-muted-foreground text-sm pt-1">
@@ -226,9 +226,9 @@ export default function CreatorWorkbenchPage() {
                 creator.submissions.map(sub => {
                   const StatusIcon = sub.status === '已批准' ? CheckCircle : Clock;
                   return (
-                    <Card key={sub.id} className="overflow-hidden">
+                    <Card key={sub.id} className="overflow-hidden group hover:shadow-xl transition-shadow">
                        <div className="aspect-video bg-muted relative">
-                        <Image src={sub.imageUrl} alt={sub.title} fill objectFit="cover" data-ai-hint={sub['data-ai-hint']} />
+                        <Image src={sub.imageUrl} alt={sub.title} fill objectFit="cover" data-ai-hint={sub['data-ai-hint']} className="group-hover:scale-105 transition-transform duration-300" />
                        </div>
                        <div className="p-4">
                         <p className="font-semibold">{sub.title}</p>
@@ -249,9 +249,22 @@ export default function CreatorWorkbenchPage() {
           </Card>
         </TabsContent>
          <TabsContent value="generator" className="mt-4">
-          <ModelGenerator />
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <Wand2 className="h-6 w-6 text-primary"/>
+                        <CardTitle>AI 3D 模型生成器</CardTitle>
+                    </div>
+                    <CardDescription>输入文本描述，我们的人工智能将为您生成一个3D模型预览图。</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ModelGenerator />
+                </CardContent>
+            </Card>
         </TabsContent>
       </Tabs>
     </div>
   );
 }
+
+    
