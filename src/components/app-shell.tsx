@@ -89,7 +89,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <SidebarMenuButton asChild isActive={pathname === '/login'} tooltip={{children: '请先登录', side: 'right'}}>
                         <Link href="/login">
                             <LogIn />
-                            <span>请先登录</span>
+                            <span>点击登录无响应</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
