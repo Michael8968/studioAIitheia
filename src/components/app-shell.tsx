@@ -53,8 +53,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Sidebar>
         <SidebarInset>
           <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:hidden">
-            <SidebarTrigger asChild>
-              <Button size="icon" variant="outline" className='h-8 w-8'><Bot size={16}/></Button>
+            <SidebarTrigger variant="outline" size="icon" className="h-8 w-8">
+              <Bot size={16} />
             </SidebarTrigger>
             <h1 className="text-lg font-semibold">Alitheia</h1>
           </header>
