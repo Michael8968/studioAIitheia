@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -38,13 +39,7 @@ const allNavItems = {
 
 const getNavItemsForRole = (role: Role | null) => {
   if (!role) return [];
-  if (role === 'admin') return allNavItems.admin;
-  
-  let navItems: typeof allNavItems.admin = [];
-  if(allNavItems[role]) {
-    navItems = [...navItems, ...allNavItems[role]];
-  }
-  return navItems;
+  return allNavItems[role] || [];
 }
 
 
