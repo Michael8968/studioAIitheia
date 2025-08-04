@@ -36,19 +36,20 @@ const evaluateSellerDataPrompt = ai.definePrompt({
   output: {schema: EvaluateSellerDataOutputSchema},
   prompt: `You are an AI assistant tasked with evaluating the relevance of seller data to pre-established demand categories.
 
-  Analyze the provided seller data and assess its relevance to each demand category.
+  Analyze the provided seller data, which includes product descriptions, service offerings, and company information.
+  For each demand category provided, assess how relevant the seller's offerings are.
   Assign a relevance score between 0 and 1 for each category, where 1 indicates high relevance and 0 indicates no relevance.
-  Provide a brief explanation for each score.
+  Provide a brief, clear explanation for each score.
 
   Seller Data:
-  {{sellerData}}
+  {{{sellerData}}}
 
   Demand Categories:
   {{#each demandCategories}}
   - {{{this}}}
   {{/each}}
 
-  Output should be a JSON array of category relevance scores and explanations:
+  Your output must be a valid JSON array of objects, where each object contains a category, a relevanceScore, and a reason. Follow this schema precisely:
   ${JSON.stringify(EvaluateSellerDataOutputSchema.describe)}
   `,
 });

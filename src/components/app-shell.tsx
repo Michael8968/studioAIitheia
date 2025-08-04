@@ -25,8 +25,8 @@ import { Button } from './ui/button';
 
 const navItems = {
   user: [
-    { href: '/demands', label: '需求池', icon: ClipboardList },
     { href: '/shopping-assistant', label: 'AI 购物助手', icon: Bot },
+    { href: '/demands', label: '需求池', icon: ClipboardList },
   ],
   creator: [
      { href: '/creator-workbench', label: '创意者工作台', icon: LayoutGrid },
@@ -35,8 +35,8 @@ const navItems = {
      { href: '/supplier-onboarding', label: '供应商入驻', icon: UploadCloud },
   ],
   admin: [
-    { href: '/demands', label: '需求池', icon: ClipboardList },
     { href: '/shopping-assistant', label: 'AI 购物助手', icon: Bot },
+    { href: '/demands', label: '需求池', icon: ClipboardList },
     { href: '/creator-workbench', label: '创意者工作台', icon: LayoutGrid },
     { href: '/supplier-onboarding', label: '供应商入驻', icon: UploadCloud },
   ],
@@ -45,7 +45,9 @@ const navItems = {
 
 const getNavItemsForRole = (role: Role | null) => {
   if (!role) return [];
-  // Admin gets all nav items. For other roles, return their specific items.
+  if (role === 'admin') {
+     return navItems.admin;
+  }
   return navItems[role] || [];
 }
 
@@ -102,7 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                        <div className="flex justify-between items-center w-full">
                           <div className="flex items-center gap-2">
                             <Avatar className="w-8 h-8">
-                                <AvatarImage src={`https://placehold.co/32x32.png`} data-ai-hint="user avatar" />
+                                <AvatarImage src={`https://placehold.co/32x32/orange/white/png?text=${user.name.charAt(0)}`} data-ai-hint="user avatar" />
                                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
