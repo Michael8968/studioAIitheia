@@ -63,7 +63,7 @@ const getNavItemsForRole = (role: Role | null) => {
     const allItems = [
       ...navItems.user,
       ...navItems.creator,
-      ...navs.supplier,
+      ...navItems.supplier,
     ];
     // Remove duplicates
     return allItems.filter((item, index, self) =>
