@@ -86,10 +86,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               ))}
                {!role && (
                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname === '/login'} tooltip={{children: '请先登录', side: 'right'}}>
+                    <SidebarMenuButton asChild isActive={pathname === '/login'} tooltip={{children: '请登录', side: 'right'}}>
                         <Link href="/login">
                             <LogIn />
-                            <span>点击登录无响应</span>
+                            <span>请登录</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
