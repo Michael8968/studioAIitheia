@@ -91,7 +91,7 @@ const statusVariantMap: { [key: string]: 'default' | 'secondary' | 'outline' } =
   '已完成': 'outline',
 };
 
-const submissionStatusVariantMap: { [key: string]: 'secondary' | 'default' | 'outline' } = {
+const submissionStatusVariantMap: { [key: string]: 'secondary' | 'default' | 'outline' | 'destructive' } = {
     '已批准': 'secondary',
     '审核中': 'default',
     '已拒绝': 'destructive',
@@ -126,7 +126,7 @@ export default function CreatorWorkbenchPage() {
               <SelectValue placeholder="选择一个创作者...">
                  <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src={creator.avatar} alt={creator.name} />
+                        <AvatarImage src={`https://placehold.co/32x32.png`} alt={creator.name} />
                         <AvatarFallback>{creator.initials}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -141,7 +141,7 @@ export default function CreatorWorkbenchPage() {
                 <SelectItem key={c.id} value={c.id}>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src={c.avatar} alt={c.name} />
+                        <AvatarImage src={`https://placehold.co/32x32.png`} alt={c.name} />
                         <AvatarFallback>{c.initials}</AvatarFallback>
                     </Avatar>
                      <div>
@@ -228,7 +228,7 @@ export default function CreatorWorkbenchPage() {
                   return (
                     <Card key={sub.id} className="overflow-hidden">
                        <div className="aspect-video bg-muted relative">
-                        <Image src={sub.imageUrl} alt={sub.title} layout="fill" objectFit="cover" data-ai-hint={sub['data-ai-hint']} />
+                        <Image src={sub.imageUrl} alt={sub.title} fill objectFit="cover" data-ai-hint={sub['data-ai-hint']} />
                        </div>
                        <div className="p-4">
                         <p className="font-semibold">{sub.title}</p>
