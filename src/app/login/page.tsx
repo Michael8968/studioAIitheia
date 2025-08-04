@@ -21,7 +21,7 @@ const roles: {
   {
     name: '李明',
     title: '李明 (管理员)',
-    description: '拥有所有权限,可以访问所有页面,包括用户管理和供应商数据整合。',
+    description: '保证平台AI模型的精准度和数据质量；监控平台健康度；高效管理所有用户和资源。',
     badgeText: '管理员',
     badgeVariant: 'destructive',
     role: 'admin',
@@ -39,16 +39,6 @@ const roles: {
     'data-ai-hint': 'technology logo',
   },
   {
-    name: '张伟',
-    title: '张伟 (普通用户)',
-    description: '可以使用智能匹配和智能搜索功能来发现最适合自己的产品和服务。',
-    badgeText: '普通用户',
-    badgeVariant: 'outline',
-    role: 'user',
-    loginText: '以张伟身份登录',
-    'data-ai-hint': 'male user',
-  },
-  {
     name: '王芳',
     title: '王芳 (创意者)',
     description: '可以访问创意工坊,利用AI工具进行内容创作和设计。',
@@ -58,6 +48,16 @@ const roles: {
     loginText: '以王芳身份登录',
     'data-ai-hint': 'female creator',
   },
+  {
+    name: '张伟',
+    title: '张伟 (普通用户)',
+    description: '可以使用智能匹配和智能搜索功能来发现最适合自己的产品和服务。',
+    badgeText: '普通用户',
+    badgeVariant: 'outline',
+    role: 'user',
+    loginText: '以张伟身份登录',
+    'data-ai-hint': 'male user',
+  },
 ];
 
 export default function LoginPage() {
@@ -66,7 +66,7 @@ export default function LoginPage() {
 
   const handleLogin = (role: Role) => {
     login(role);
-    router.push('/');
+    router.push('/shopping-assistant');
   };
 
   return (
