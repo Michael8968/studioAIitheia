@@ -42,26 +42,54 @@ const navItems = {
   ],
 };
 
+const loginRoles: { name: string; role: Role }[] = [
+    { name: '以李明身份登录 (管理员)', role: 'admin' },
+    { name: '以创新科技身份登录 (供应商)', role: 'supplier' },
+    { name: '以王芳身份登录 (创意者)', role: 'creator' },
+    { name: '以张伟身份登录 (普通用户)', role: 'user' },
+];
+
+const roleRedirectMap: Record<Role, string> = {
+    admin: '/shopping-assistant',
+    user: '/shopping-assistant',
+    creator: '/creator-workbench',
+    supplier: '/supplier-onboarding',
+};
 
 const getNavItemsForRole = (role: Role | null) => {
   if (!role) return [];
+  // Admin sees all items from other roles combined
   if (role === 'admin') {
-     return navItems.admin;
+    const allItems = [
+      ...navItems.user,
+      ...navItems.creator,
+      ...navs.supplier,
+    ];
+    // Remove duplicates
+    return allItems.filter((item, index, self) =>
+        index === self.findIndex((t) => (
+            t.href === item.href && t.label === item.label
+        ))
+    );
   }
   return navItems[role] || [];
 }
 
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { role, user, logout } = useAuthStore();
+  const { role, user, login, logout } = useAuthStore();
   const currentNavItems = getNavItemsForRole(role);
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   }
+
+  const handleLogin = (role: Role) => {
+    login(role);
+    router.push(roleRedirectMap[role] || '/shopping-assistant');
+  };
 
   return (
     <SidebarProvider>
@@ -86,12 +114,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               ))}
                {!role && (
                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname === '/login'} tooltip={{children: '请登录', side: 'right'}}>
-                        <Link href="/login">
+                   <DropdownMenu>
+                     <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton isActive={pathname === '/login'} tooltip={{children: '请登录', side: 'right'}}>
                             <LogIn />
                             <span>请登录</span>
-                        </Link>
-                    </SidebarMenuButton>
+                        </SidebarMenuButton>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent side="right" align="start" className="w-64">
+                       <DropdownMenuLabel>选择一个角色登录</DropdownMenuLabel>
+                       <DropdownMenuSeparator/>
+                       {loginRoles.map((r) => (
+                         <DropdownMenuItem key={r.role} onClick={() => handleLogin(r.role)}>
+                           {r.name}
+                         </DropdownMenuItem>
+                       ))}
+                     </DropdownMenuContent>
+                   </DropdownMenu>
                 </SidebarMenuItem>
                )}
             </SidebarMenu>
