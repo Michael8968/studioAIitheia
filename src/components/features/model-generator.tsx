@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -5,13 +6,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { generate3DModel } from '@/ai/flows/generate-3d-model';
 import { Loader2, Wand2 } from 'lucide-react';
 import Image from 'next/image';
+import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({
   description: z.string().min(10, { message: '请至少输入10个字符。' }),
@@ -57,13 +58,13 @@ export function ModelGenerator() {
                 <FormItem>
                   <FormLabel>模型描述</FormLabel>
                   <FormControl>
-                    <Input placeholder="例如：一个红色的复古跑车" {...field} />
+                    <Textarea placeholder="例如：一个红色的复古跑车，带有镀铬装饰和白色轮胎" {...field} rows={5} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isLoading} className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button type="submit" disabled={isLoading} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
               生成模型
             </Button>

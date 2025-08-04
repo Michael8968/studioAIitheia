@@ -9,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { CheckCircle, Clock, FileText, Gift, Lightbulb, Palette, Wand2 } from 'lucide-react';
+import { CheckCircle, Clock, FileText, Gift, Lightbulb, Palette, Wand2, Briefcase, Users, ThumbsUp } from 'lucide-react';
 
 
 const mockCreators = [
   {
     id: 'creator-1',
     name: '李明',
-    avatar: '/avatars/01.png',
+    avatar: 'https://placehold.co/40x40.png',
     initials: 'LM',
     bio: '专注于未来派3D模型的设计师。',
     tasks: [
@@ -35,7 +35,7 @@ const mockCreators = [
   {
     id: 'creator-2',
     name: '王芳',
-    avatar: '/avatars/02.png',
+    avatar: 'https://placehold.co/40x40.png',
     initials: 'WF',
     bio: '热爱有机形态和自然纹理的艺术家。',
     tasks: [
@@ -51,7 +51,7 @@ const mockCreators = [
   {
     id: 'creator-3',
     name: '张伟',
-    avatar: '/avatars/03.png',
+    avatar: 'https://placehold.co/40x40.png',
     initials: 'ZW',
     bio: '擅长制作写实风格的家居用品模型。',
      tasks: [
@@ -70,7 +70,7 @@ const mockCreators = [
   {
     id: 'creator-4',
     name: '刘丽',
-    avatar: '/avatars/04.png',
+    avatar: 'https://placehold.co/40x40.png',
     initials: 'LL',
     bio: '对角色设计和动漫美学充满热情。',
      tasks: [
@@ -123,10 +123,10 @@ export default function CreatorWorkbenchPage() {
          <div className="flex items-center gap-4 w-full sm:w-auto">
           <Select value={selectedCreatorId} onValueChange={handleCreatorChange}>
             <SelectTrigger className="w-full sm:w-[280px]">
-              <SelectValue placeholder="选择一个创作者...">
+              <SelectValue asChild>
                  <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src={`https://placehold.co/32x32.png`} alt={creator.name} />
+                        <AvatarImage src={creator.avatar} alt={creator.name} data-ai-hint="creator avatar" />
                         <AvatarFallback>{creator.initials}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -141,7 +141,7 @@ export default function CreatorWorkbenchPage() {
                 <SelectItem key={c.id} value={c.id}>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src={`https://placehold.co/32x32.png`} alt={c.name} />
+                        <AvatarImage src={c.avatar} alt={c.name} data-ai-hint="creator avatar" />
                         <AvatarFallback>{c.initials}</AvatarFallback>
                     </Avatar>
                      <div>
@@ -157,10 +157,10 @@ export default function CreatorWorkbenchPage() {
       </div>
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
-          <TabsTrigger value="tasks">当前任务</TabsTrigger>
-          <TabsTrigger value="demands">相关需求</TabsTrigger>
-          <TabsTrigger value="submissions">我的提交</TabsTrigger>
-          <TabsTrigger value="generator">AI 3D 生成</TabsTrigger>
+          <TabsTrigger value="tasks"><Briefcase className="mr-2 h-4 w-4" />当前任务</TabsTrigger>
+          <TabsTrigger value="demands"><Users className="mr-2 h-4 w-4" />相关需求</TabsTrigger>
+          <TabsTrigger value="submissions"><ThumbsUp className="mr-2 h-4 w-4" />我的提交</TabsTrigger>
+          <TabsTrigger value="generator"><Wand2 className="mr-2 h-4 w-4" />AI 3D 生成</TabsTrigger>
         </TabsList>
         <TabsContent value="tasks" className="mt-4">
           <Card>
@@ -195,7 +195,7 @@ export default function CreatorWorkbenchPage() {
                     return (
                         <Card key={demand.id} className="hover:shadow-md transition-shadow">
                             <CardHeader>
-                                <CardTitle className="text-lg">{demand.title}</CardTitle>
+                                <CardTitle>{demand.title}</CardTitle>
                                 <div className="flex items-center gap-2 text-muted-foreground text-sm pt-1">
                                     <Icon className="h-4 w-4" />
                                     <span>{demand.category}</span>
@@ -231,7 +231,7 @@ export default function CreatorWorkbenchPage() {
                         <Image src={sub.imageUrl} alt={sub.title} fill objectFit="cover" data-ai-hint={sub['data-ai-hint']} className="group-hover:scale-105 transition-transform duration-300" />
                        </div>
                        <div className="p-4">
-                        <p className="font-semibold">{sub.title}</p>
+                        <h3 className="font-semibold">{sub.title}</h3>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                             <StatusIcon className={`h-4 w-4 ${sub.status === '已批准' ? 'text-green-500' : ''}`} />
                             <Badge variant={submissionStatusVariantMap[sub.status] || 'default'}>{sub.status}</Badge>
