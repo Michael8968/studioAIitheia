@@ -17,11 +17,13 @@ import {
   SidebarInset,
   SidebarFooter,
   SidebarSeparator,
+  SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import { useAuthStore, type Role } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Button } from './ui/button';
+import { Skeleton } from './ui/skeleton';
 
 const navItems = {
   user: [
@@ -66,9 +68,15 @@ const getNavItemsForRole = (role: Role | null) => {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { role, user, login, logout } = useAuthStore();
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const currentNavItems = getNavItemsForRole(role);
 
   const handleLogout = () => {
@@ -92,40 +100,49 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
-               {currentNavItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)} tooltip={{children: item.label, side: "right"}}>
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-               {!role && (
-                 <SidebarMenuItem>
-                   <DropdownMenu>
-                     <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton isActive={pathname === '/login'} tooltip={{children: '请登录', side: 'right'}}>
-                            <LogIn />
-                            <span>请登录</span>
-                        </SidebarMenuButton>
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent side="right" align="start" className="w-64">
-                       <DropdownMenuLabel>选择一个角色登录</DropdownMenuLabel>
-                       <DropdownMenuSeparator/>
-                       {loginRoles.map((r) => (
-                         <DropdownMenuItem key={r.role} onClick={() => handleLogin(r.role)}>
-                           {r.name}
-                         </DropdownMenuItem>
-                       ))}
-                     </DropdownMenuContent>
-                   </DropdownMenu>
-                </SidebarMenuItem>
-               )}
+               {mounted ? (
+                <>
+                  {currentNavItems.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)} tooltip={{children: item.label, side: "right"}}>
+                        <Link href={item.href}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                  {!role && (
+                    <SidebarMenuItem>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <SidebarMenuButton isActive={pathname === '/login'} tooltip={{children: '请登录', side: 'right'}}>
+                                <LogIn />
+                                <span>请登录</span>
+                            </SidebarMenuButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="right" align="start" className="w-64">
+                          <DropdownMenuLabel>选择一个角色登录</DropdownMenuLabel>
+                          <DropdownMenuSeparator/>
+                          {loginRoles.map((r) => (
+                            <DropdownMenuItem key={r.role} onClick={() => handleLogin(r.role)}>
+                              {r.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </SidebarMenuItem>
+                  )}
+                </>
+              ) : (
+                <>
+                  <SidebarMenuSkeleton showIcon />
+                  <SidebarMenuSkeleton showIcon />
+                </>
+              )}
             </SidebarMenu>
           </SidebarContent>
-           {role && user && (
+           {mounted && role && user && (
             <>
               <SidebarSeparator />
               <SidebarFooter>
@@ -158,6 +175,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </SidebarFooter>
             </>
           )}
+           {!mounted && (
+              <>
+                <SidebarSeparator />
+                <SidebarFooter>
+                  <div className="flex items-center gap-2 p-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <div className="flex flex-col gap-1 w-full group-data-[collapsible=icon]:hidden">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  </div>
+                </SidebarFooter>
+              </>
+            )}
         </Sidebar>
         <SidebarInset>
           <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:hidden">
