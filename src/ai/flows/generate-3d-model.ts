@@ -34,14 +34,12 @@ export async function generate3DModel(input: Generate3DModelInput): Promise<Gene
 const generate3DModelPrompt = ai.definePrompt({
   name: 'generate3DModelPrompt',
   input: {schema: Generate3DModelInputSchema},
-  output: {schema: Generate3DModelOutputSchema},
-  prompt: `You are a 3D model generator.  The user will provide a description of a 3D model, and you will generate a 3D model preview.
+  prompt: `You are a 3D model generator. The user will provide a description of a 3D model, and you will generate a 3D model preview.
 
 Description: {{{description}}}`,
   config: {
-    // IMPORTANT: ONLY the googleai/gemini-2.0-flash-preview-image-generation model is able to generate images. You MUST use exactly this model to generate images.
     model: 'googleai/gemini-2.0-flash-preview-image-generation',
-    responseModalities: ['TEXT', 'IMAGE'], // MUST provide both TEXT and IMAGE, IMAGE only won't work
+    responseModalities: ['TEXT', 'IMAGE'],
   },
 });
 
@@ -52,13 +50,7 @@ const generate3DModelFlow = ai.defineFlow(
     outputSchema: Generate3DModelOutputSchema,
   },
   async input => {
-    const {media} = await ai.generate({
-      prompt: input.description,
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
-    });
+    const {media} = await generate3DModelPrompt(input);
 
     if (!media || !media.url) {
       throw new Error('No model data URI was returned.');
