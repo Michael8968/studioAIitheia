@@ -58,19 +58,9 @@ const roleRedirectMap: Record<Role, string> = {
 
 const getNavItemsForRole = (role: Role | null) => {
   if (!role) return [];
-  // Admin sees all items from other roles combined
+  // Admin sees all items
   if (role === 'admin') {
-    const allItems = [
-      ...navItems.user,
-      ...navItems.creator,
-      ...navItems.supplier,
-    ];
-    // Remove duplicates
-    return allItems.filter((item, index, self) =>
-        index === self.findIndex((t) => (
-            t.href === item.href && t.label === item.label
-        ))
-    );
+    return navItems.admin;
   }
   return navItems[role] || [];
 }
