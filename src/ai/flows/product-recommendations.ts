@@ -27,7 +27,7 @@ const ProductRecommendationsOutputSchema = z.object({
     z.object({
       name: z.string().describe('The name of the recommended product or service.'),
       description: z.string().describe('A short description of the recommendation.'),
-      imageUrl: z.string().optional().describe('An optional URL to an image of the product or service.'),
+      imageUrl: z.string().optional().describe('An optional URL to an image of the product or service. This should always be a placeholder from https://placehold.co.'),
       link: z.string().optional().describe('An optional URL to the product or service page.'),
     })
   ).describe('An array of product or service recommendations.'),
@@ -50,7 +50,7 @@ User Profile Tags: {{#each userProfile.tags}}{{{this}}}{{#unless @last}}, {{/unl
 The user also provided this image for reference: {{media url=photoDataUri}}
 {{/if}}
 
-Please provide a list of 3-5 recommendations. Include a name, description, optional image URL and optional link for each recommendation.
+Please provide a list of 3-5 recommendations. For each recommendation, include a name, description, and an optional link. For the imageUrl, you MUST use a placeholder image from 'https://placehold.co/600x400.png'. Do not use any other domain.
 
 Your output should be a JSON object that follows this schema: ${JSON.stringify(ProductRecommendationsOutputSchema.shape)}`,
 });
