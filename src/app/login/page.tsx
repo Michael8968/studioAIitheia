@@ -60,13 +60,20 @@ const roles: {
   },
 ];
 
+const roleRedirectMap: Record<Role, string> = {
+    admin: '/shopping-assistant',
+    user: '/shopping-assistant',
+    creator: '/creator-workbench',
+    supplier: '/supplier-onboarding',
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
 
   const handleLogin = (role: Role) => {
     login(role);
-    router.push('/shopping-assistant');
+    router.push(roleRedirectMap[role] || '/shopping-assistant');
   };
 
   return (

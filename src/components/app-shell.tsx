@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bot, ClipboardList, LayoutGrid, UploadCloud, Package, LogIn, UserCircle, LogOut } from 'lucide-react';
 import {
   SidebarProvider,
@@ -54,11 +54,13 @@ const getNavItemsForRole = (role: Role | null) => {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { role, user, logout } = useAuthStore();
   const currentNavItems = getNavItemsForRole(role);
 
   const handleLogout = () => {
     logout();
+    router.push('/login');
   }
 
   return (
@@ -104,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                        <div className="flex justify-between items-center w-full">
                           <div className="flex items-center gap-2">
                             <Avatar className="w-8 h-8">
-                                <AvatarImage src={`https://placehold.co/32x32/orange/white/png?text=${user.name.charAt(0)}`} data-ai-hint="user avatar" />
+                                <AvatarImage src={`https://placehold.co/32x32.png`} data-ai-hint="user avatar" />
                                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
