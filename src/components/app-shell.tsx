@@ -4,7 +4,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bot, ClipboardList, LayoutGrid, UploadCloud, Package, LogIn, UserCircle, LogOut, KeyRound } from 'lucide-react';
+import { Bot, ClipboardList, LayoutGrid, UploadCloud, Package, LogIn, UserCircle, LogOut, KeyRound, Search, Terminal, BookCopy, Library } from 'lucide-react';
 import {
   SidebarProvider,
   Sidebar,
@@ -42,6 +42,10 @@ const navItems = {
     { href: '/creator-workbench', label: '创意设计师', icon: LayoutGrid },
     { href: '/supplier-onboarding', label: '供应商中心', icon: UploadCloud },
     { href: '/permission-management', label: '权限管理', icon: KeyRound },
+    { href: '/intelligent-search', label: '智能搜索', icon: Search },
+    { href: '/prompt-management', label: '提示词管理', icon: Terminal },
+    { href: '/knowledge-base', label: '知识库管理', icon: BookCopy },
+    { href: '/resource-library', label: '公共资源库', icon: Library },
   ],
 };
 
