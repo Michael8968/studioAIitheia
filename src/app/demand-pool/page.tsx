@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { PlusCircle, Search, ListFilter, Trash2, Milestone, Phone, Send, UserCheck, Bot, Users } from "lucide-react";
+import { PlusCircle, Search, ListFilter, Trash2, Milestone, Phone, Send, UserCheck, Bot, Users, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,13 +18,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { CheckedState } from '@radix-ui/react-checkbox';
+import { recommendCreatives, type RecommendCreativesOutput } from '@/ai/flows/recommend-creatives';
+import { useToast } from '@/hooks/use-toast';
 
 const mockDemands = [
-  { id: 'D001', title: '为新的咖啡品牌设计一个定制logo', budget: '¥3,500 - ¥7,000', category: '平面设计', status: '开放中', created: '2024-08-01' },
-  { id: 'D002', title: '开发一款宠物看护服务的移动应用', budget: '¥56,000 - ¥84,000', category: '软件开发', status: '洽谈中', created: '2024-07-28' },
-  { id: 'D003', title: '为一个新奇小工具寻找3D打印原型', budget: '¥10,000 - ¥17,500', category: '3D建模', status: '开放中', created: '2024-07-25' },
-  { id: 'D004', title: '网站专业翻译（中到英）', budget: '¥5,600 - ¥8,400', category: '翻译', status: '已完成', created: '2024-07-15' },
-  { id: 'D005', title: '寻找环保包装的供应商', budget: '可议价', category: '采购', status: '开放中', created: '2024-08-05' },
+  { id: 'D001', title: '为新的咖啡品牌设计一个定制logo', description: '我们需要一个现代、简约且令人难忘的logo，要能体现咖啡的温暖和社区感。颜色以棕色和米色为主。', budget: '¥3,500 - ¥7,000', category: '平面设计', status: '开放中', created: '2024-08-01' },
+  { id: 'D002', title: '开发一款宠物看护服务的移动应用', description: '一款iOS和Android应用，功能包括用户注册、宠物档案管理、服务预订、在线支付和实时聊天。', budget: '¥56,000 - ¥84,000', category: '软件开发', status: '洽谈中', created: '2024-07-28' },
+  { id: 'D003', title: '为一个新奇小工具寻找3D打印原型', description: '一个手持式电子产品的外壳原型，需要高精度打印，材料为ABS或类似强度的塑料。需要提供3D模型文件。', budget: '¥10,000 - ¥17,500', category: '3D建模', status: '开放中', created: '2024-07-25' },
+  { id: 'D004', title: '网站专业翻译（中到英）', description: '一个大约5000字的营销网站，内容涉及科技和金融，需要翻译成地道的商务英语。', budget: '¥5,600 - ¥8,400', category: '翻译', status: '已完成', created: '2024-07-15' },
+  { id: 'D005', title: '寻找环保包装的供应商', description: '为化妆品系列寻找可持续、可回收的包装解决方案，包括瓶子、罐子和外包装盒。', budget: '可议价', category: '采购', status: '开放中', created: '2024-08-05' },
 ];
 
 const mockCreatives = [
@@ -91,10 +93,41 @@ type RecommendationDialogProps = {
 };
 
 function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: RecommendationDialogProps) {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [aiResults, setAiResults] = useState<RecommendCreativesOutput | null>(null);
+
   const isBatchMode = selectedDemands.length > 0;
+  const currentDemand = isBatchMode ? selectedDemands[0] : demand;
   const title = isBatchMode
     ? `为 ${selectedDemands.length} 个选定的需求推荐执行者`
     : `为需求 “${demand?.title}” 推荐执行者`;
+
+  const handleAiRecommend = async () => {
+    if (!currentDemand) return;
+    setIsLoading(true);
+    setAiResults(null);
+    try {
+      const result = await recommendCreatives({
+        demand: {
+          title: currentDemand.title,
+          description: currentDemand.description,
+          category: currentDemand.category,
+        },
+        creatives: mockCreatives,
+      });
+      setAiResults(result);
+    } catch (error) {
+      console.error("AI recommendation failed:", error);
+      toast({
+        variant: "destructive",
+        title: "AI 推荐失败",
+        description: "抱歉，在调用AI时发生错误，请稍后再试。",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,20 +167,59 @@ function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: R
                         <Checkbox id={`creative-${creative.id}`} />
                       </div>
                     ))}
-  
-                </div>
+                  </div>
                 </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
           <TabsContent value="ai" className="mt-4">
             <div className="flex flex-col items-center justify-center text-center p-8 border-2 border-dashed rounded-lg h-full min-h-[300px]">
-                <Bot className="h-16 w-16 text-primary mb-4" />
-                <h3 className="text-xl font-headline mb-2">AI 智能匹配</h3>
-                <p className="text-muted-foreground mb-6 max-w-sm">
-                    AI 将分析需求详情、创意者技能和供应商能力，以找出最佳匹配。
-                </p>
-                <Button>启动 AI 推荐</Button>
+              {!isLoading && !aiResults && (
+                <>
+                  <Bot className="h-16 w-16 text-primary mb-4" />
+                  <h3 className="text-xl font-headline mb-2">AI 智能匹配</h3>
+                  <p className="text-muted-foreground mb-6 max-w-sm">
+                      AI 将分析需求详情、创意者技能和供应商能力，以找出最佳匹配。
+                      {isBatchMode && " (仅分析第一个选定需求作为样本)"}
+                  </p>
+                  <Button onClick={handleAiRecommend} disabled={isLoading}>
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                    启动 AI 推荐
+                  </Button>
+                </>
+              )}
+              {isLoading && (
+                <div className="flex flex-col items-center">
+                  <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
+                  <p className="text-muted-foreground">AI 正在为您分析最佳人选...</p>
+                </div>
+              )}
+              {aiResults && (
+                <div className="w-full text-left space-y-4">
+                  <h3 className="text-xl font-headline text-center mb-4">AI 推荐结果</h3>
+                  {aiResults.recommendations.map(rec => (
+                     <Card key={rec.id} className="bg-background">
+                       <CardHeader className="flex-row items-center justify-between pb-2">
+                          <div className="flex items-center gap-3">
+                             <Avatar className="h-10 w-10">
+                                <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={mockCreatives.find(c => c.id === rec.id)?.avatar} />
+                                <AvatarFallback>{rec.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                             <div>
+                                <p className="font-bold">{rec.name}</p>
+                                <p className="text-xs text-muted-foreground">{mockCreatives.find(c => c.id === rec.id)?.specialty}</p>
+                             </div>
+                          </div>
+                          <Checkbox defaultChecked />
+                       </CardHeader>
+                       <CardContent>
+                          <p className="text-sm text-muted-foreground pl-2 border-l-2 border-primary/50">{rec.reason}</p>
+                       </CardContent>
+                     </Card>
+                  ))}
+                   <Button onClick={handleAiRecommend} variant="link" size="sm" className="w-full" disabled={isLoading}>重新生成</Button>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
