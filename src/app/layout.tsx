@@ -1,10 +1,23 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { AppShell } from '@/components/app-shell';
+import { AppLayout } from '@/components/app-layout';
 import { Toaster } from '@/components/ui/toaster';
+import { Inter, Space_Grotesk } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+});
+
 
 export const metadata: Metadata = {
-  title: 'AI 智能匹配',
+  title: 'AI 智能匹配平台',
   description: 'AI-powered e-commerce platform',
 };
 
@@ -14,17 +27,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="font-body antialiased">
-        <AppShell>{children}</AppShell>
+    <html lang="zh" suppressHydrationWarning>
+      <body className={cn("font-body antialiased", inter.variable, spaceGrotesk.variable)}>
+        <AppLayout>{children}</AppLayout>
         <Toaster />
       </body>
     </html>
