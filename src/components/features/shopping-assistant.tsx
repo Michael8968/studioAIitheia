@@ -12,12 +12,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { getProductRecommendations, type ProductRecommendationsOutput } from '@/ai/flows/product-recommendations';
 import { generateUserProfile, type UserProfile } from '@/ai/flows/generate-user-profile';
-import { Loader2, Image as ImageIcon, Send, Sparkles, Tags, BrainCircuit, CheckCircle } from 'lucide-react';
+import { Loader2, Image as ImageIcon, Send, Sparkles, Tags, BrainCircuit, CheckCircle, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '../ui/badge';
 import { useAuthStore } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '../ui/separator';
 
 const formSchema = z.object({
   description: z.string().min(1, { message: '请输入您要搜索的内容' }),
@@ -191,6 +192,114 @@ type Message = {
     recommendations?: ProductRecommendationsOutput['recommendations'];
 };
 
+
+function CustomServiceConnector() {
+    const [step, setStep] = useState<'initial' | 'input' | 'loading' | 'results'>('initial');
+    const [demand, setDemand] = useState('');
+
+    const handleFindMatch = () => {
+        if (!demand) return;
+        setStep('loading');
+        setTimeout(() => {
+            setStep('results');
+        }, 1500); 
+    };
+
+    const mockDesigners = [
+        { name: '爱丽丝', specialty: '奇幻与科幻角色设计', avatar: 'female designer' },
+        { name: '查理', specialty: '游戏可用资产与环境', avatar: 'male designer' },
+    ];
+    
+    const mockSupplier = { name: '创新科技', specialty: '高精度3D打印', avatar: 'technology logo' };
+
+
+    return (
+        <Card className="shadow-lg">
+            <CardHeader>
+                <CardTitle className="font-headline">高端定制服务</CardTitle>
+                <CardDescription>需要更个性化的服务吗？我们可以为您连接顶级设计师和供应商。</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {step === 'initial' && (
+                     <>
+                        <div className="aspect-video bg-muted rounded-lg mb-4 relative overflow-hidden">
+                            <Image src="https://placehold.co/600x400.png" layout="fill" objectFit="cover" alt="定制服务" data-ai-hint="luxury customization" />
+                        </div>
+                        <Button className="w-full" onClick={() => setStep('input')}>开始定制</Button>
+                    </>
+                )}
+
+                {step === 'input' && (
+                    <div className="space-y-4">
+                        <Textarea 
+                            placeholder="请详细描述您的特别需求，例如：我需要一个赛博朋克风格的女性机器人角色模型，用于游戏开发..."
+                            rows={6}
+                            value={demand}
+                            onChange={(e) => setDemand(e.target.value)}
+                        />
+                        <Button className="w-full" onClick={handleFindMatch} disabled={!demand}>寻找匹配</Button>
+                         <Button variant="link" size="sm" className="w-full" onClick={() => setStep('initial')}>返回</Button>
+                    </div>
+                )}
+
+                {step === 'loading' && (
+                     <div className="flex flex-col items-center justify-center space-y-4 p-8">
+                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                        <p className="text-muted-foreground">正在为您寻找最佳匹配...</p>
+                    </div>
+                )}
+
+                {step === 'results' && (
+                    <div className="space-y-6">
+                        <div>
+                            <h4 className="font-semibold mb-3">推荐的创意设计师</h4>
+                            <div className="space-y-4">
+                                {mockDesigners.map(d => (
+                                     <div key={d.name} className="flex items-center justify-between p-3 bg-background rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar>
+                                                <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={d.avatar}/>
+                                                <AvatarFallback>{d.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-bold">{d.name}</p>
+                                                <p className="text-xs text-muted-foreground">{d.specialty}</p>
+                                            </div>
+                                        </div>
+                                        <Button size="sm" variant="outline"><MessageSquare className="mr-2 h-4 w-4"/> 在线沟通</Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                            <h4 className="font-semibold mb-3">推荐的供应商</h4>
+                             <div className="flex items-center justify-between p-3 bg-background rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <Avatar>
+                                        <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={mockSupplier.avatar}/>
+                                        <AvatarFallback>{mockSupplier.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-bold">{mockSupplier.name}</p>
+                                        <p className="text-xs text-muted-foreground">{mockSupplier.specialty}</p>
+                                    </div>
+                                </div>
+                                <Button size="sm" variant="outline"><MessageSquare className="mr-2 h-4 w-4"/> 在线沟通</Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">如果没有合适的设计师，我们推荐此供应商来满足您的需求。</p>
+                        </div>
+                        <Button variant="link" size="sm" className="w-full" onClick={() => setStep('input')}>重新描述需求</Button>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+
 export function ShoppingAssistant() {
     const [messages, setMessages] = useState<Message[]>([
         { type: 'ai', profile: null, recommendations: [] }
@@ -346,18 +455,7 @@ export function ShoppingAssistant() {
                 </Card>
             </div>
             <div className="lg:col-span-1 space-y-8">
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <CardTitle className="font-headline">高端定制服务</CardTitle>
-                        <CardDescription>需要更个性化的服务吗？我们可以为您连接顶级设计师和供应商。</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="aspect-video bg-muted rounded-lg mb-4 relative overflow-hidden">
-                            <Image src="https://placehold.co/600x400.png" layout="fill" objectFit="cover" alt="定制服务" data-ai-hint="luxury customization" />
-                        </div>
-                        <Button className="w-full">了解更多</Button>
-                    </CardContent>
-                </Card>
+                <CustomServiceConnector />
             </div>
         </div>
     );
