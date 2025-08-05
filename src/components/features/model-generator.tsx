@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { generate3DModel } from '@/ai/flows/generate-3d-model';
 import { Loader2, Wand2 } from 'lucide-react';
@@ -86,5 +85,3 @@ export function ModelGenerator() {
     </div>
   );
 }
-
-    

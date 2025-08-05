@@ -10,15 +10,15 @@ import { useAuthStore } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const mockTasks = [
-  { id: 'D001', title: 'Need a custom logo for a new coffee brand', budget: '$500 - $1000', category: 'Graphic Design' },
-  { id: 'D003', title: 'Looking for 3D printed prototypes for a new gadget', budget: '$1500 - $2500', category: '3D Modeling' },
-  { id: 'D005', title: 'Seeking a supplier for eco-friendly packaging', budget: 'Negotiable', category: 'Sourcing' },
+  { id: 'D001', title: '为新的咖啡品牌设计一个定制logo', budget: '¥3,500 - ¥7,000', category: '平面设计' },
+  { id: 'D003', title: '为一个新奇小工具寻找3D打印原型', budget: '¥10,000 - ¥17,500', category: '3D建模' },
+  { id: 'D005', title: '寻找环保包装的供应商', budget: '可议价', category: '采购' },
 ];
 
 const mockSubmissions = [
-    { name: 'Sci-Fi Soldier Character', category: '3D Character', price: '$1,200', updated: '2024-07-20' },
-    { name: 'Vintage Racing Car', category: '3D Vehicle', price: '$800', updated: '2024-06-15' },
-    { name: 'Fantasy Sword Asset', category: 'Game Prop', price: '$150', updated: '2024-05-30' },
+    { name: '科幻士兵角色', category: '3D角色', price: '¥8,400', updated: '2024-07-20' },
+    { name: '复古赛车', category: '3D交通工具', price: '¥5,600', updated: '2024-06-15' },
+    { name: '奇幻风格的剑', category: '游戏道具', price: '¥1,050', updated: '2024-05-30' },
 ];
 
 export default function CreatorWorkbenchPage() {
@@ -29,12 +29,12 @@ export default function CreatorWorkbenchPage() {
             <div className="flex items-center justify-center h-full">
                 <Card className="w-full max-w-md">
                     <CardHeader>
-                        <CardTitle>Access Denied</CardTitle>
-                        <CardDescription>You do not have permission to view this page.</CardDescription>
+                        <CardTitle>访问受限</CardTitle>
+                        <CardDescription>您没有权限访问此页面。</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Button onClick={() => window.location.href = '/login'} className="w-full">
-                            Return to Login
+                            返回登录
                         </Button>
                     </CardContent>
                 </Card>
@@ -44,30 +44,30 @@ export default function CreatorWorkbenchPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Creator Workbench</h1>
-        <p className="text-muted-foreground">Manage your tasks, create with AI, and track your submissions.</p>
+        <h1 className="text-3xl font-headline font-bold">创意者工作台</h1>
+        <p className="text-muted-foreground">管理您的任务，使用 AI 进行创作，并跟踪您的提交。</p>
       </div>
 
       <Tabs defaultValue="tasks">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="tasks"><Briefcase className="mr-2"/> Tasks & Demands</TabsTrigger>
-          <TabsTrigger value="ai-creation"><Wand2 className="mr-2"/> 3D AI Creation</TabsTrigger>
-          <TabsTrigger value="submissions"><FileCheck2 className="mr-2"/> My Submissions</TabsTrigger>
+          <TabsTrigger value="tasks"><Briefcase className="mr-2"/> 任务与需求</TabsTrigger>
+          <TabsTrigger value="ai-creation"><Wand2 className="mr-2"/> 3D AI 创作</TabsTrigger>
+          <TabsTrigger value="submissions"><FileCheck2 className="mr-2"/> 我的提交</TabsTrigger>
         </TabsList>
         <TabsContent value="tasks" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Available Tasks</CardTitle>
-              <CardDescription>These are open demands that match your skills. Claim one to get started.</CardDescription>
+              <CardTitle>可接受的任务</CardTitle>
+              <CardDescription>这些是与您的技能相匹配的开放需求。接受一个以开始工作。</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Demand Title</TableHead>
-                    <TableHead>Budget</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                    <TableHead>需求标题</TableHead>
+                    <TableHead>预算</TableHead>
+                    <TableHead>类别</TableHead>
+                    <TableHead className="text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -77,7 +77,7 @@ export default function CreatorWorkbenchPage() {
                       <TableCell>{task.budget}</TableCell>
                       <TableCell>{task.category}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline"><Milestone className="mr-2 h-4 w-4" /> Accept Task</Button>
+                        <Button variant="outline"><Milestone className="mr-2 h-4 w-4" /> 接受任务</Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -89,8 +89,8 @@ export default function CreatorWorkbenchPage() {
         <TabsContent value="ai-creation" className="mt-4">
             <Card>
                 <CardHeader>
-                    <CardTitle>3D AI Creation</CardTitle>
-                    <CardDescription>Use AI to generate 3D model previews from a text description.</CardDescription>
+                    <CardTitle>3D AI 创作</CardTitle>
+                    <CardDescription>使用 AI 从文本描述生成 3D 模型预览。</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ModelGenerator />
@@ -100,17 +100,17 @@ export default function CreatorWorkbenchPage() {
         <TabsContent value="submissions" className="mt-4">
           <Card>
             <CardHeader>
-                <CardTitle>My Submissions</CardTitle>
-                <CardDescription>A list of your submitted and approved works.</CardDescription>
+                <CardTitle>我的提交</CardTitle>
+                <CardDescription>您已提交和已批准作品的列表。</CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Work Name</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Last Updated</TableHead>
+                            <TableHead>作品名称</TableHead>
+                            <TableHead>类别</TableHead>
+                            <TableHead>价格</TableHead>
+                            <TableHead>最后更新</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

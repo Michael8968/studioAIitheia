@@ -10,18 +10,18 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLab
 import { PlusCircle, Search, ListFilter, Eye, Edit, Trash2 } from "lucide-react";
 
 const mockEntries = [
-  { id: 'K001', name: '3D Printing Material Guide', category: 'Manufacturing', tags: ['PLA', 'ABS', 'Resin'] },
-  { id: 'K002', name: 'Standard Supply Chain Terms', category: 'Logistics', tags: ['FOB', 'CIF', 'EXW'] },
-  { id: 'K003', name: 'Color Theory for Designers', category: 'Design Principles', tags: ['Analogous', 'Complementary'] },
-  { id: 'K004', name: 'Software Dev Contract Template', category: 'Legal', tags: ['Contract', 'SOW'] },
+  { id: 'K001', name: '3D打印材料指南', category: '制造', tags: ['PLA', 'ABS', '树脂'] },
+  { id: 'K002', name: '标准供应链术语', category: '物流', tags: ['FOB', 'CIF', 'EXW'] },
+  { id: 'K003', name: '设计师色彩理论', category: '设计原则', tags: ['类比', '互补'] },
+  { id: 'K004', name: '软件开发合同模板', category: '法律', tags: ['合同', 'SOW'] },
 ];
 
 export default function KnowledgeBasePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Knowledge Base Management</h1>
-        <p className="text-muted-foreground">Curate and manage the knowledge that powers the platform's AI.</p>
+        <h1 className="text-3xl font-headline font-bold">知识库管理</h1>
+        <p className="text-muted-foreground">管理和维护平台AI所依赖的知识。</p>
       </div>
 
       <Card>
@@ -30,28 +30,28 @@ export default function KnowledgeBasePage() {
             <div className="flex items-center gap-4 flex-1">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search entries..." className="pl-10" />
+                <Input placeholder="搜索条目..." className="pl-10" />
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline">
                     <ListFilter className="mr-2 h-4 w-4" />
-                    Filter by Category
+                    按类别筛选
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  <DropdownMenuLabel>Category</DropdownMenuLabel>
+                  <DropdownMenuLabel>类别</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem>Manufacturing</DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem>Logistics</DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem>Design</DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem>Legal</DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem>制造</DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem>物流</DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem>设计</DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem>法律</DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add New Entry
+              新增条目
             </Button>
           </div>
         </CardHeader>
@@ -59,10 +59,10 @@ export default function KnowledgeBasePage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Entry Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>条目名称</TableHead>
+                <TableHead>类别</TableHead>
+                <TableHead>标签</TableHead>
+                <TableHead className="text-right">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

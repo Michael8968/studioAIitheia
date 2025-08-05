@@ -12,20 +12,20 @@ import { MoreHorizontal, Star, Save, ShieldBan, ShieldCheck, Trash2 } from "luci
 import Image from "next/image";
 import type { Role } from "@/store/auth";
 
-type UserStatus = "Active" | "Suspended" | "Banned";
+type UserStatus = "正常" | "已暂停" | "黑名单";
 
 const mockUsers: { id: string; name: string; email: string; role: Role; status: UserStatus; rating: number; avatar: string; }[] = [
-  { id: 'admin-1', name: 'Li Ming', email: 'li.ming@example.com', role: 'admin', status: 'Active', rating: 5, avatar: 'male administrator' },
-  { id: 'supplier-1', name: 'Innovative Tech', email: 'contact@chuangxin.tech', role: 'supplier', status: 'Active', rating: 4, avatar: 'technology logo' },
-  { id: 'creator-1', name: 'Wang Fang', email: 'wang.fang@example.com', role: 'creator', status: 'Active', rating: 5, avatar: 'female creator' },
-  { id: 'user-1', name: 'Zhang Wei', email: 'zhang.wei@example.com', role: 'user', status: 'Suspended', rating: 3, avatar: 'male user' },
-  { id: 'user-2', name: 'Chen Jie', email: 'chen.jie@example.com', role: 'user', status: 'Banned', rating: 1, avatar: 'female user' },
+  { id: 'admin-1', name: '李明', email: 'li.ming@example.com', role: 'admin', status: '正常', rating: 5, avatar: 'male administrator' },
+  { id: 'supplier-1', name: '创新科技', email: 'contact@chuangxin.tech', role: 'supplier', status: '正常', rating: 4, avatar: 'technology logo' },
+  { id: 'creator-1', name: '王芳', email: 'wang.fang@example.com', role: 'creator', status: '正常', rating: 5, avatar: 'female creator' },
+  { id: 'user-1', name: '张伟', email: 'zhang.wei@example.com', role: 'user', status: '已暂停', rating: 3, avatar: 'male user' },
+  { id: 'user-2', name: '陈洁', email: 'chen.jie@example.com', role: 'user', status: '黑名单', rating: 1, avatar: 'female user' },
 ];
 
 const statusVariantMap: { [key in UserStatus]: "default" | "secondary" | "destructive" } = {
-  'Active': 'default',
-  'Suspended': 'secondary',
-  'Banned': 'destructive',
+  '正常': 'default',
+  '已暂停': 'secondary',
+  '黑名单': 'destructive',
 };
 
 
@@ -39,23 +39,23 @@ export default function PermissionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Permission Management</h1>
-        <p className="text-muted-foreground">Manage user roles, statuses, and permissions across the platform.</p>
+        <h1 className="text-3xl font-headline font-bold">权限管理</h1>
+        <p className="text-muted-foreground">管理平台用户的角色、状态和权限。</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
+          <CardTitle>所有用户</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>用户</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>角色</TableHead>
+                <TableHead>评级</TableHead>
+                <TableHead className="text-right">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -71,18 +71,18 @@ export default function PermissionsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariantMap[user.status]} className={user.status === 'Active' ? 'bg-green-500' : ''}>{user.status}</Badge>
+                    <Badge variant={statusVariantMap[user.status]} className={user.status === '正常' ? 'bg-green-500' : ''}>{user.status}</Badge>
                   </TableCell>
                   <TableCell>
                     <Select defaultValue={user.role} onValueChange={(newRole) => handleRoleChange(user.id, newRole as Role)} disabled={user.role === 'admin'}>
                       <SelectTrigger className="w-[120px]">
-                        <SelectValue placeholder="Select role" />
+                        <SelectValue placeholder="选择角色" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="supplier">Supplier</SelectItem>
-                        <SelectItem value="creator">Creator</SelectItem>
-                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="admin">管理员</SelectItem>
+                        <SelectItem value="supplier">供应商</SelectItem>
+                        <SelectItem value="creator">创意者</SelectItem>
+                        <SelectItem value="user">用户</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
@@ -101,13 +101,13 @@ export default function PermissionsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem><Save className="mr-2 h-4 w-4"/> Save Role</DropdownMenuItem>
-                        {user.status !== 'Suspended' ? 
-                            <DropdownMenuItem><ShieldBan className="mr-2 h-4 w-4"/> Suspend User</DropdownMenuItem>
-                            : <DropdownMenuItem><ShieldCheck className="mr-2 h-4 w-4"/> Reactivate User</DropdownMenuItem>
+                        <DropdownMenuItem><Save className="mr-2 h-4 w-4"/> 保存角色</DropdownMenuItem>
+                        {user.status !== '已暂停' ? 
+                            <DropdownMenuItem><ShieldBan className="mr-2 h-4 w-4"/> 暂停用户</DropdownMenuItem>
+                            : <DropdownMenuItem><ShieldCheck className="mr-2 h-4 w-4"/> 重新激活</DropdownMenuItem>
                         }
                         <DropdownMenuItem className="text-destructive focus:text-destructive">
-                            <Trash2 className="mr-2 h-4 w-4"/> Delete User
+                            <Trash2 className="mr-2 h-4 w-4"/> 删除用户
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

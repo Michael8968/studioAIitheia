@@ -9,10 +9,10 @@ import { Star, Circle, MessageSquare, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const mockDesigners = [
-  { id: 'creator-1', name: 'Alice', avatar: 'female creator', rating: 4.9, online: true, desc: '10+ years in character design, specialized in fantasy and sci-fi.', tags: ['3D Character', 'Sci-Fi', 'Stylized'] },
-  { id: 'creator-2', name: 'Bob', avatar: 'male designer', rating: 4.8, online: false, desc: 'Expert in architectural visualization and realistic rendering.', tags: ['ArchViz', 'Realism', 'Unreal Engine'] },
-  { id: 'creator-3', name: 'Charlie', avatar: 'male artist', rating: 5.0, online: true, desc: 'Passionate about creating game-ready assets and environments.', tags: ['Game Assets', 'PBR', 'Blender'] },
-  { id: 'creator-4', name: 'Diana', avatar: 'female artist', rating: 4.7, online: true, desc: 'Motion graphics and abstract 3D art specialist.', tags: ['Abstract', 'Houdini', 'Motion Design'] },
+  { id: 'creator-1', name: '爱丽丝', avatar: 'female creator', rating: 4.9, online: true, desc: '10年以上角色设计经验，专精于奇幻与科幻风格。', tags: ['3D角色', '科幻', '风格化'] },
+  { id: 'creator-2', name: '鲍勃', avatar: 'male designer', rating: 4.8, online: false, desc: '建筑可视化与写实渲染专家。', tags: ['建筑可视化', '写实', 'UE引擎'] },
+  { id: 'creator-3', name: '查理', avatar: 'male artist', rating: 5.0, online: true, desc: '热衷于创作游戏可用资产与环境。', tags: ['游戏资产', 'PBR', 'Blender'] },
+  { id: 'creator-4', name: '戴安娜', avatar: 'female artist', rating: 4.7, online: true, desc: '动态图形与抽象3D艺术专家。', tags: ['抽象', 'Houdini', '动态设计'] },
 ];
 
 export default function DesignersPage() {
@@ -22,12 +22,12 @@ export default function DesignersPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                <h1 className="text-3xl font-headline font-bold">Creative Designers</h1>
-                <p className="text-muted-foreground">Find and collaborate with top-tier creative talent.</p>
+                <h1 className="text-3xl font-headline font-bold">创意设计师</h1>
+                <p className="text-muted-foreground">寻找顶尖创意人才并与之合作。</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline">System Recommendation</Button>
-                    <Button onClick={() => router.push('/demand-pool')}>Publish to Demand Pool</Button>
+                    <Button variant="outline">系统推荐</Button>
+                    <Button onClick={() => router.push('/demand-pool')}>去需求池发布</Button>
                 </div>
             </div>
 
@@ -45,7 +45,7 @@ export default function DesignersPage() {
                                 </div>
                                 <Badge variant={designer.online ? 'default' : 'outline'} className="mt-1 bg-green-500 hover:bg-green-600 text-white data-[state=false]:bg-muted data-[state=false]:text-muted-foreground">
                                     <Circle className={`mr-2 h-2 w-2 ${designer.online ? 'fill-white' : 'fill-muted-foreground'}`} />
-                                    {designer.online ? 'Online' : 'Offline'}
+                                    {designer.online ? '在线' : '离线'}
                                 </Badge>
                             </div>
                         </CardHeader>
@@ -60,11 +60,11 @@ export default function DesignersPage() {
                         <CardFooter className="gap-2">
                             <Button className="w-full" disabled={!designer.online}>
                                 <Phone className="mr-2 h-4 w-4"/>
-                                Make an Appointment
+                                预约
                             </Button>
                             <Button variant="outline" className="w-full" disabled={!designer.online}>
                                 <MessageSquare className="mr-2 h-4 w-4"/>
-                                Communicate
+                                沟通
                             </Button>
                         </CardFooter>
                     </Card>

@@ -43,12 +43,12 @@ const fileToDataUri = (file: File): Promise<string> => {
 const UserMessage = ({ text, imageUrl }: { text: string; imageUrl?: string | null }) => (
     <div className="flex items-start justify-end gap-3">
         <div className="bg-primary text-primary-foreground rounded-lg p-3 max-w-lg">
-            {imageUrl && <Image src={imageUrl} alt="User upload" width={200} height={200} className="rounded-md mb-2" />}
+            {imageUrl && <Image src={imageUrl} alt="用户上传" width={200} height={200} className="rounded-md mb-2" />}
             <p>{text}</p>
         </div>
         <Avatar className="border">
             <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="user avatar" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarFallback>您</AvatarFallback>
         </Avatar>
     </div>
 );
@@ -303,7 +303,7 @@ export function ShoppingAssistant() {
                             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-3">
                                 {imagePreview && (
                                     <div className="relative w-24 h-24">
-                                        <Image src={imagePreview} alt="Image preview" layout="fill" className="rounded-md object-cover" />
+                                        <Image src={imagePreview} alt="图片预览" layout="fill" className="rounded-md object-cover" />
                                         <Button
                                             type="button"
                                             variant="destructive"
@@ -353,7 +353,7 @@ export function ShoppingAssistant() {
                     </CardHeader>
                     <CardContent>
                         <div className="aspect-video bg-muted rounded-lg mb-4 relative overflow-hidden">
-                            <Image src="https://placehold.co/600x400.png" layout="fill" objectFit="cover" alt="Custom service" data-ai-hint="luxury customization" />
+                            <Image src="https://placehold.co/600x400.png" layout="fill" objectFit="cover" alt="定制服务" data-ai-hint="luxury customization" />
                         </div>
                         <Button className="w-full">了解更多</Button>
                     </CardContent>

@@ -8,33 +8,33 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Edit, Ban } from "lucide-react";
 
 const mockPrompts = [
-  { id: 'userProfilePrompt', name: 'User Profile Generator', scope: 'Shopping Assistant', status: 'Active' },
-  { id: 'productRecommendationsPrompt', name: 'Product Recommender', scope: 'Shopping Assistant', status: 'Active' },
-  { id: 'evaluateSellerDataPrompt', name: 'Seller Data Evaluator', scope: 'Supplier Center', status: 'Active' },
-  { id: 'generate3DModelPrompt', name: '3D Model Generator', scope: 'Creator Workbench', status: 'Active' },
+  { id: 'userProfilePrompt', name: '用户画像生成器', scope: 'AI购物助手', status: '生效中' },
+  { id: 'productRecommendationsPrompt', name: '商品推荐器', scope: 'AI购物助手', status: '生效中' },
+  { id: 'evaluateSellerDataPrompt', name: '供应商数据评估器', scope: '供应商中心', status: '生效中' },
+  { id: 'generate3DModelPrompt', name: '3D模型生成器', scope: '创意者工作台', status: '生效中' },
 ];
 
 export default function PromptsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Prompt Management</h1>
-        <p className="text-muted-foreground">View and manage the AI prompts used throughout the application.</p>
+        <h1 className="text-3xl font-headline font-bold">提示词管理</h1>
+        <p className="text-muted-foreground">查看并管理应用中使用的AI提示词。</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>System Prompts</CardTitle>
+          <CardTitle>系统提示词</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Prompt Name</TableHead>
-                <TableHead>Prompt ID</TableHead>
-                <TableHead>Scope</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>提示词名称</TableHead>
+                <TableHead>提示词ID</TableHead>
+                <TableHead>范围</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead className="text-right">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -44,7 +44,7 @@ export default function PromptsPage() {
                   <TableCell className="font-mono text-xs">{prompt.id}</TableCell>
                   <TableCell>{prompt.scope}</TableCell>
                   <TableCell>
-                    <Badge variant={prompt.status === 'Active' ? 'default' : 'destructive'} className={prompt.status === 'Active' ? 'bg-green-500' : ''}>{prompt.status}</Badge>
+                    <Badge variant={prompt.status === '生效中' ? 'default' : 'destructive'} className={prompt.status === '生效中' ? 'bg-green-500' : ''}>{prompt.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-1">
                     <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>

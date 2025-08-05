@@ -14,17 +14,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuthStore } from "@/store/auth";
 
 const mockDemands = [
-  { id: 'D001', title: 'Need a custom logo for a new coffee brand', budget: '$500 - $1000', category: 'Graphic Design', status: 'Open', created: '2024-08-01' },
-  { id: 'D002', title: 'Develop a mobile app for pet sitting services', budget: '$8000 - $12000', category: 'Software Development', status: 'In Progress', created: '2024-07-28' },
-  { id: 'D003', title: 'Looking for 3D printed prototypes for a new gadget', budget: '$1500 - $2500', category: '3D Modeling', status: 'Open', created: '2024-07-25' },
-  { id: 'D004', title: 'Professional translation of a website (EN to ZH)', budget: '$800 - $1200', category: 'Translation', status: 'Completed', created: '2024-07-15' },
-  { id: 'D005', title: 'Seeking a supplier for eco-friendly packaging', budget: 'Negotiable', category: 'Sourcing', status: 'Open', created: '2024-08-05' },
+  { id: 'D001', title: '为新的咖啡品牌设计一个定制logo', budget: '¥3,500 - ¥7,000', category: '平面设计', status: '开放中', created: '2024-08-01' },
+  { id: 'D002', title: '开发一款宠物看护服务的移动应用', budget: '¥56,000 - ¥84,000', category: '软件开发', status: '洽谈中', created: '2024-07-28' },
+  { id: 'D003', title: '为一个新奇小工具寻找3D打印原型', budget: '¥10,000 - ¥17,500', category: '3D建模', status: '开放中', created: '2024-07-25' },
+  { id: 'D004', title: '网站专业翻译（中到英）', budget: '¥5,600 - ¥8,400', category: '翻译', status: '已完成', created: '2024-07-15' },
+  { id: 'D005', title: '寻找环保包装的供应商', budget: '可议价', category: '采购', status: '开放中', created: '2024-08-05' },
 ];
 
 const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
-  'Open': 'default',
-  'In Progress': 'secondary',
-  'Completed': 'outline',
+  '开放中': 'default',
+  '洽谈中': 'secondary',
+  '已完成': 'outline',
 };
 
 function DemandFormDialog() {
@@ -33,36 +33,36 @@ function DemandFormDialog() {
       <DialogTrigger asChild>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Publish New Demand
+          发布新需求
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Publish New Demand</DialogTitle>
+          <DialogTitle>发布新需求</DialogTitle>
           <DialogDescription>
-            Fill in the details of your demand. It will be visible to relevant creators and suppliers.
+            填写您的需求详情。它将对相关的创意者和供应商可见。
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="title" className="text-right">Title</Label>
-            <Input id="title" placeholder="e.g., Custom logo design" className="col-span-3" />
+            <Label htmlFor="title" className="text-right">标题</Label>
+            <Input id="title" placeholder="例如：定制logo设计" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="category" className="text-right">Category</Label>
-            <Input id="category" placeholder="e.g., Graphic Design" className="col-span-3" />
+            <Label htmlFor="category" className="text-right">类别</Label>
+            <Input id="category" placeholder="例如：平面设计" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="budget" className="text-right">Budget</Label>
-            <Input id="budget" placeholder="e.g., $500 - $1000" className="col-span-3" />
+            <Label htmlFor="budget" className="text-right">预算</Label>
+            <Input id="budget" placeholder="例如：¥3,500 - ¥7,000" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="description" className="text-right pt-2">Description</Label>
-            <Textarea id="description" placeholder="Describe your needs in detail..." className="col-span-3" />
+            <Label htmlFor="description" className="text-right pt-2">描述</Label>
+            <Textarea id="description" placeholder="详细描述您的需求..." className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">Submit Demand</Button>
+          <Button type="submit">提交需求</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -76,8 +76,8 @@ export default function DemandPoolPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-headline font-bold">Demand Pool</h1>
-          <p className="text-muted-foreground">Browse, claim, or publish demands in the ecosystem.</p>
+          <h1 className="text-3xl font-headline font-bold">需求池</h1>
+          <p className="text-muted-foreground">浏览、承接或在生态系统中发布需求。</p>
         </div>
         {role === 'user' && <DemandFormDialog />}
       </div>
@@ -87,20 +87,20 @@ export default function DemandPoolPage() {
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by title or tags..." className="pl-10" />
+              <Input placeholder="按标题或标签搜索..." className="pl-10" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
                   <ListFilter className="mr-2 h-4 w-4" />
-                  Filter
+                  筛选
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuLabel>筛选条件</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem>Category</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Status</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>类别</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>状态</DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -109,12 +109,12 @@ export default function DemandPoolPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Demand Title</TableHead>
-                <TableHead>Budget</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Published</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>需求标题</TableHead>
+                <TableHead>预算</TableHead>
+                <TableHead>类别</TableHead>
+                <TableHead>状态</TableHead>
+                <TableHead>发布于</TableHead>
+                <TableHead className="text-right">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -131,11 +131,11 @@ export default function DemandPoolPage() {
                     {role === 'admin' && (
                       <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
                     )}
-                    {(role === 'supplier' || role === 'creator') && demand.status === 'Open' && (
-                      <Button variant="outline" size="sm"><Milestone className="mr-2 h-4 w-4" />Claim</Button>
+                    {(role === 'supplier' || role === 'creator') && demand.status === '开放中' && (
+                      <Button variant="outline" size="sm"><Milestone className="mr-2 h-4 w-4" />抢单</Button>
                     )}
-                     {(role === 'supplier' || role === 'creator') && demand.status !== 'Open' && (
-                      <Button variant="outline" size="sm" disabled><Phone className="mr-2 h-4 w-4" />Contact</Button>
+                     {(role === 'supplier' || role === 'creator') && demand.status !== '开放中' && (
+                      <Button variant="outline" size="sm" disabled><Phone className="mr-2 h-4 w-4" />沟通</Button>
                     )}
                   </TableCell>
                 </TableRow>
