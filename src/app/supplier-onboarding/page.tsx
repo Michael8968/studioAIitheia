@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, PlusCircle, List, Upload } from 'lucide-react';
+import { Search, PlusCircle, List, Upload, User, Edit, Save } from 'lucide-react';
 import Image from 'next/image';
 import { DataProcessor } from '@/components/features/data-processor';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 const mockProducts = [
   { id: 'prod-1', name: '环保咖啡杯', status: '已上架', stock: 1500, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'coffee cup' },
@@ -18,6 +20,14 @@ const mockProducts = [
   { id: 'prod-3', name: '有机棉T恤-白色', status: '审核中', stock: 0, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'white t-shirt' },
   { id: 'prod-4', name: '天然手工皂', status: '库存低', stock: 45, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'handmade soap' },
   { id: 'prod-5', name: '定制化宠物项圈', status: '草稿', stock: 0, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'pet collar' },
+];
+
+const initialSupplierInfo = [
+    { id: 'info-1', key: '公司名称', value: '创新科技' },
+    { id: 'info-2', key: '联系人', value: '李经理' },
+    { id: 'info-3', key: '联系电话', value: '138-8888-8888' },
+    { id: 'info-4', key: '行业', value: '消费电子' },
+    { id: 'info-5', key: '主要产品', value: '智能家居设备, 可穿戴设备' },
 ];
 
 const statusVariantMap: { [key: string]: 'secondary' | 'outline' | 'default' | 'destructive' } = {
@@ -29,17 +39,120 @@ const statusVariantMap: { [key: string]: 'secondary' | 'outline' | 'default' | '
 
 
 export default function SupplierCenterPage() {
+    const [supplierInfo, setSupplierInfo] = useState(initialSupplierInfo);
+    const [newFieldKey, setNewFieldKey] = useState('');
+    const [newFieldValue, setNewFieldValue] = useState('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const handleAddField = () => {
+        if (newFieldKey && newFieldValue) {
+            setSupplierInfo([
+                ...supplierInfo,
+                {
+                    id: `info-${Date.now()}`,
+                    key: newFieldKey,
+                    value: newFieldValue,
+                },
+            ]);
+            setNewFieldKey('');
+            setNewFieldValue('');
+            setIsDialogOpen(false);
+        }
+    };
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">供应商中心</h1>
         <p className="text-muted-foreground">管理您的产品数据，为AI智能分析和前端展示提供数据源。</p>
       </div>
-      <Tabs defaultValue="product-management" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="basic-info" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="basic-info"><User className="mr-2 h-4 w-4" />基本信息</TabsTrigger>
           <TabsTrigger value="product-management"><List className="mr-2 h-4 w-4" />产品数据管理</TabsTrigger>
           <TabsTrigger value="bulk-import"><Upload className="mr-2 h-4 w-4" />批量数据导入</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="basic-info" className="mt-4">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>供应商基本信息</CardTitle>
+                        <CardDescription>管理您的公司档案，这些信息将有助于AI更好地理解您的业务。</CardDescription>
+                    </div>
+                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                添加新字段
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                            <DialogTitle>添加新信息字段</DialogTitle>
+                            <DialogDescription>
+                                在这里添加自定义字段以完善您的公司信息。
+                            </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="field-key" className="text-right">
+                                    字段名
+                                    </Label>
+                                    <Input 
+                                        id="field-key" 
+                                        value={newFieldKey}
+                                        onChange={(e) => setNewFieldKey(e.target.value)}
+                                        placeholder="例如：认证资质" 
+                                        className="col-span-3" 
+                                    />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="field-value" className="text-right">
+                                    字段值
+                                    </Label>
+                                    <Input 
+                                        id="field-value" 
+                                        value={newFieldValue}
+                                        onChange={(e) => setNewFieldValue(e.target.value)}
+                                        placeholder="例如：ISO9001" 
+                                        className="col-span-3" 
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit" onClick={handleAddField}>保存</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[200px]">字段</TableHead>
+                                <TableHead>值</TableHead>
+                                <TableHead className="text-right w-[100px]">操作</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {supplierInfo.map(info => (
+                                <TableRow key={info.id}>
+                                    <TableCell className="font-medium">{info.key}</TableCell>
+                                    <TableCell className="text-muted-foreground">{info.value}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="ghost" size="icon">
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </TabsContent>
+
         <TabsContent value="product-management" className="mt-4">
           <Card>
             <CardHeader>
