@@ -377,6 +377,12 @@ export function ShoppingAssistant() {
             setImagePreview(null);
         }
     }
+    
+    const examplePrompts = [
+        '帮我找一款适合程序员的机械键盘',
+        '推荐一个轻便的旅行双肩包',
+        '有没有适合初学者的无人机推荐？',
+    ];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start h-full">
@@ -428,26 +434,40 @@ export function ShoppingAssistant() {
                                     </div>
                                 )}
                                 <div className="flex gap-2">
-                                <FormField
-                                    control={form.control}
-                                    name="description"
-                                    render={({ field }) => (
-                                        <FormItem className="flex-1">
-                                            <FormControl>
-                                                <Textarea placeholder="例如：我想要一双适合夏天徒步的舒适、防水的运动鞋..." {...field} rows={1} className="min-h-[40px]"/>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button type="button" variant="outline" size="icon" asChild>
-                                    <label htmlFor="image-upload" className="cursor-pointer">
-                                        <ImageIcon />
-                                        <input id="image-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
-                                    </label>
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting} size="icon">
-                                    {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
-                                </Button>
+                                    <FormField
+                                        control={form.control}
+                                        name="description"
+                                        render={({ field }) => (
+                                            <FormItem className="flex-1">
+                                                <FormControl>
+                                                    <Textarea placeholder="例如：我想要一双适合夏天徒步的舒适、防水的运动鞋..." {...field} rows={1} className="min-h-[40px]"/>
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button type="button" variant="outline" size="icon" asChild>
+                                        <label htmlFor="image-upload" className="cursor-pointer">
+                                            <ImageIcon />
+                                            <input id="image-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
+                                        </label>
+                                    </Button>
+                                    <Button type="submit" disabled={isSubmitting} size="icon">
+                                        {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
+                                    </Button>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {examplePrompts.map((prompt) => (
+                                        <Button
+                                            key={prompt}
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-xs"
+                                            onClick={() => form.setValue('description', prompt)}
+                                        >
+                                            {prompt}
+                                        </Button>
+                                    ))}
                                 </div>
                             </form>
                         </Form>
