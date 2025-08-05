@@ -83,6 +83,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+  React.useEffect(() => {
+    if (mounted && !role && pathname !== '/login') {
+      router.replace('/login');
+    }
+  }, [mounted, role, pathname, router]);
+
+
   const currentNavItems = role ? navItemsByRole[role] : [];
   
   const handleLogout = () => {
@@ -95,9 +102,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
   
-  // If no role but not on login, redirect to login
+  // If no role but not on login, show a loading skeleton while redirecting
   if (!role) {
-      router.replace('/login');
       return <div className="flex h-screen w-screen items-center justify-center"><Skeleton className="h-full w-full" /></div>;
   }
 
