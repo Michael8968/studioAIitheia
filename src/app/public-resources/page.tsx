@@ -83,6 +83,35 @@ function ImportDialog() {
 }
 
 export default function PublicResourcesPage() {
+  const [activeTab, setActiveTab] = useState('links');
+  const { toast } = useToast();
+
+  const handleExport = () => {
+    const dataToExport = activeTab === 'links' ? mockLinks : mockApis;
+    const headers = Object.keys(dataToExport[0]);
+    const csvContent = [
+      headers.join(','),
+      ...dataToExport.map(row => 
+        headers.map(header => `"${(row as any)[header]}"`).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${activeTab}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+        title: '导出成功',
+        description: `已成功将 ${dataToExport.length} 条记录导出为 ${activeTab}.csv`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -90,7 +119,7 @@ export default function PublicResourcesPage() {
         <p className="text-muted-foreground">管理共享资源，如外部链接和API端点。</p>
       </div>
 
-      <Tabs defaultValue="links">
+      <Tabs defaultValue="links" value={activeTab} onValueChange={setActiveTab}>
         <div className="flex justify-between items-start">
             <TabsList className="grid grid-cols-2 w-[400px]">
                 <TabsTrigger value="links"><Link className="mr-2"/> 外部链接</TabsTrigger>
@@ -98,7 +127,7 @@ export default function PublicResourcesPage() {
             </TabsList>
              <div className="flex gap-2">
                 <ImportDialog />
-                <Button variant="outline"><Download className="mr-2 h-4 w-4"/> 导出</Button>
+                <Button variant="outline" onClick={handleExport}><Download className="mr-2 h-4 w-4"/> 导出</Button>
             </div>
         </div>
 
