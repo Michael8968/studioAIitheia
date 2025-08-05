@@ -223,7 +223,7 @@ function CustomServiceConnector() {
                 {step === 'initial' && (
                      <>
                         <div className="aspect-video bg-muted rounded-lg mb-4 relative overflow-hidden">
-                            <Image src="https://placehold.co/600x400.png" layout="fill" objectFit="cover" alt="定制服务" data-ai-hint="luxury customization" />
+                            <Image src="https://placehold.co/600x400.png" layout="fill" objectFit="cover" alt="定制服务" data-ai-hint="astronaut suit" />
                         </div>
                         <Button className="w-full" onClick={() => setStep('input')}>开始定制</Button>
                     </>
