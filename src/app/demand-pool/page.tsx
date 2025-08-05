@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { PlusCircle, Search, ListFilter, Trash2, Milestone, Phone, Send, UserCheck, Bot } from "lucide-react";
+import { PlusCircle, Search, ListFilter, Trash2, Milestone, Phone, Send, UserCheck, Bot, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
+import type { CheckedState } from '@radix-ui/react-checkbox';
 
 const mockDemands = [
   { id: 'D001', title: '为新的咖啡品牌设计一个定制logo', budget: '¥3,500 - ¥7,000', category: '平面设计', status: '开放中', created: '2024-08-01' },
@@ -83,19 +84,25 @@ function DemandFormDialog() {
 }
 
 type RecommendationDialogProps = {
-  demand: typeof mockDemands[0];
+  demand: (typeof mockDemands[0]) | null;
+  selectedDemands: (typeof mockDemands[0])[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-function RecommendationDialog({ demand, open, onOpenChange }: RecommendationDialogProps) {
+function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: RecommendationDialogProps) {
+  const isBatchMode = selectedDemands.length > 0;
+  const title = isBatchMode
+    ? `为 ${selectedDemands.length} 个选定的需求推荐执行者`
+    : `为需求 “${demand?.title}” 推荐执行者`;
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>推荐执行者</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            为需求 <span className="font-semibold text-primary">“{demand.title}”</span> 推荐最合适的创意者或供应商。
+            {isBatchMode ? '您选择的创意者或供应商将被推荐给所有选定的需求。' : '推荐最合适的创意者或供应商。'}
           </DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="manual">
@@ -127,7 +134,8 @@ function RecommendationDialog({ demand, open, onOpenChange }: RecommendationDial
                         <Checkbox id={`creative-${creative.id}`} />
                       </div>
                     ))}
-                  </div>
+  
+                </div>
                 </ScrollArea>
               </CardContent>
             </Card>
@@ -156,12 +164,37 @@ function RecommendationDialog({ demand, open, onOpenChange }: RecommendationDial
 export default function DemandPoolPage() {
   const { role } = useAuthStore();
   const [isRecDialogOpen, setRecDialogOpen] = useState(false);
-  const [selectedDemand, setSelectedDemand] = useState<typeof mockDemands[0] | null>(null);
-
+  const [selectedDemand, setSelectedDemand] = useState<(typeof mockDemands[0]) | null>(null);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  
   const handleRecommendClick = (demand: typeof mockDemands[0]) => {
     setSelectedDemand(demand);
+    setSelectedRows([]); // Clear batch selection when opening single
     setRecDialogOpen(true);
   };
+  
+  const handleBatchRecommendClick = () => {
+      setSelectedDemand(null); // Clear single selection
+      setRecDialogOpen(true);
+  }
+
+  const handleSelectRow = (id: string, checked: CheckedState) => {
+    if (checked) {
+      setSelectedRows(prev => [...prev, id]);
+    } else {
+      setSelectedRows(prev => prev.filter(rowId => rowId !== id));
+    }
+  };
+
+  const handleSelectAll = (checked: CheckedState) => {
+    if (checked) {
+      setSelectedRows(mockDemands.map(d => d.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const selectedDemandsForDialog = mockDemands.filter(d => selectedRows.includes(d.id));
 
   return (
     <>
@@ -195,12 +228,27 @@ export default function DemandPoolPage() {
                   <DropdownMenuCheckboxItem>状态</DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+               {role === 'admin' && (
+                <Button onClick={handleBatchRecommendClick} disabled={selectedRows.length === 0}>
+                  <Users className="mr-2 h-4 w-4" />
+                  批量推荐 ({selectedRows.length})
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
+                  {role === 'admin' && (
+                    <TableHead className="w-[50px]">
+                      <Checkbox
+                        onCheckedChange={handleSelectAll}
+                        checked={selectedRows.length === mockDemands.length && mockDemands.length > 0}
+                        aria-label="选择全部"
+                      />
+                    </TableHead>
+                  )}
                   <TableHead>需求标题</TableHead>
                   <TableHead>预算</TableHead>
                   <TableHead>类别</TableHead>
@@ -211,7 +259,16 @@ export default function DemandPoolPage() {
               </TableHeader>
               <TableBody>
                 {mockDemands.map((demand) => (
-                  <TableRow key={demand.id}>
+                  <TableRow key={demand.id} data-state={selectedRows.includes(demand.id) && "selected"}>
+                    {role === 'admin' && (
+                      <TableCell>
+                        <Checkbox
+                          onCheckedChange={(checked) => handleSelectRow(demand.id, checked)}
+                          checked={selectedRows.includes(demand.id)}
+                          aria-label={`选择需求 ${demand.title}`}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="font-medium">{demand.title}</TableCell>
                     <TableCell>{demand.budget}</TableCell>
                     <TableCell>{demand.category}</TableCell>
@@ -242,9 +299,10 @@ export default function DemandPoolPage() {
           </CardContent>
         </Card>
       </div>
-      {selectedDemand && (
+      {(isRecDialogOpen) && (
         <RecommendationDialog
           demand={selectedDemand}
+          selectedDemands={selectedDemandsForDialog}
           open={isRecDialogOpen}
           onOpenChange={setRecDialogOpen}
         />
