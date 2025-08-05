@@ -1,11 +1,15 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, Upload, Edit, Trash2, Link, Code } from "lucide-react";
+import { Download, Upload, Edit, Trash2, Link, Code, UploadCloud, File } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useToast } from '@/hooks/use-toast';
 
 const mockLinks = [
   { id: 'L001', name: 'ShadCN UI 文档', url: 'https://ui.shadcn.com', desc: '组件库文档。' },
@@ -16,6 +20,67 @@ const mockApis = [
   { id: 'A001', name: 'Stripe API', endpoint: 'https://api.stripe.com', status: '生效中' },
   { id: 'A002', name: 'Google Maps API', endpoint: 'https://maps.googleapis.com', status: '生效中' },
 ];
+
+function ImportDialog() {
+    const [file, setFile] = useState<File | null>(null);
+    const { toast } = useToast();
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+        }
+    };
+
+    const handleImport = () => {
+        if (!file) {
+            toast({
+                variant: 'destructive',
+                title: '未选择文件',
+                description: '请选择一个文件进行导入。',
+            });
+            return;
+        }
+        // Placeholder for actual import logic
+        toast({
+            title: '导入成功',
+            description: `${file.name} 已被成功导入。`,
+        });
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline"><Upload className="mr-2 h-4 w-4"/> 导入</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>导入资源</DialogTitle>
+                    <DialogDescription>
+                        选择一个文件来批量导入外部链接或API端点。请确保文件格式正确。
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                     <label htmlFor="file-upload" className="block cursor-pointer border-2 border-dashed border-muted-foreground/50 rounded-lg p-12 text-center hover:border-primary transition-colors">
+                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <p className="mt-4 text-sm font-semibold">将文件拖放到此处，或点击浏览</p>
+                        <p className="mt-1 text-xs text-muted-foreground">支持的文件格式: CSV, JSON</p>
+                        <Input id="file-upload" type="file" accept=".csv,.json" className="hidden" onChange={handleFileChange} />
+                    </label>
+                    {file && (
+                         <div className="mt-4 flex items-center justify-center text-sm text-muted-foreground">
+                            <File className="mr-2 h-4 w-4"/>
+                            已选择文件: <span className="font-medium text-foreground ml-1">{file.name}</span>
+                        </div>
+                    )}
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleImport} disabled={!file}>确认导入</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 export default function PublicResourcesPage() {
   return (
@@ -32,7 +97,7 @@ export default function PublicResourcesPage() {
                 <TabsTrigger value="apis"><Code className="mr-2"/> API端点</TabsTrigger>
             </TabsList>
              <div className="flex gap-2">
-                <Button variant="outline"><Upload className="mr-2 h-4 w-4"/> 导入</Button>
+                <ImportDialog />
                 <Button variant="outline"><Download className="mr-2 h-4 w-4"/> 导出</Button>
             </div>
         </div>
