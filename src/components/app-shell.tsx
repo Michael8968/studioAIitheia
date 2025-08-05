@@ -34,13 +34,13 @@ const navItems = {
      { href: '/creator-workbench', label: '创意者工作台', icon: LayoutGrid },
   ],
   supplier: [
-     { href: '/supplier-onboarding', label: '供应商入驻', icon: UploadCloud },
+     { href: '/supplier-onboarding', label: '供应商中心', icon: UploadCloud },
   ],
   admin: [
     { href: '/shopping-assistant', label: 'AI 购物助手', icon: Bot },
     { href: '/demands', label: '需求池', icon: ClipboardList },
     { href: '/creator-workbench', label: '创意设计师', icon: LayoutGrid },
-    { href: '/supplier-onboarding', label: '供应商入驻', icon: UploadCloud },
+    { href: '/supplier-onboarding', label: '供应商中心', icon: UploadCloud },
     { href: '/permission-management', label: '权限管理', icon: KeyRound },
   ],
 };
