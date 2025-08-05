@@ -8,19 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, PlusCircle, List, Upload, User, Edit, Save } from 'lucide-react';
+import { List, Upload, User, Edit, PlusCircle, Download, FileOutput } from 'lucide-react';
 import Image from 'next/image';
-import { DataProcessor } from '@/components/features/data-processor';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-
-const mockProducts = [
-  { id: 'prod-1', name: '环保咖啡杯', status: '已上架', stock: 1500, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'coffee cup' },
-  { id: 'prod-2', name: '智能LED灯泡', status: '已上架', stock: 800, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'led bulb' },
-  { id: 'prod-3', name: '有机棉T恤-白色', status: '审核中', stock: 0, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'white t-shirt' },
-  { id: 'prod-4', name: '天然手工皂', status: '库存低', stock: 45, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'handmade soap' },
-  { id: 'prod-5', name: '定制化宠物项圈', status: '草稿', stock: 0, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'pet collar' },
-];
+import { DataProcessor } from '@/components/features/data-processor';
 
 const initialSupplierInfo = [
     { id: 'info-1', key: '公司名称', value: '创新科技' },
@@ -30,13 +22,20 @@ const initialSupplierInfo = [
     { id: 'info-5', key: '主要产品', value: '智能家居设备, 可穿戴设备' },
 ];
 
+const mockProducts = [
+  { id: 'prod-1', name: '环保咖啡杯', status: '已上架', stock: 1500, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'coffee cup' },
+  { id: 'prod-2', name: '智能LED灯泡', status: '已上架', stock: 800, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'led bulb' },
+  { id: 'prod-3', name: '有机棉T恤-白色', status: '审核中', stock: 0, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'white t-shirt' },
+  { id: 'prod-4', name: '天然手工皂', status: '库存低', stock: 45, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'handmade soap' },
+  { id: 'prod-5', name: '定制化宠物项圈', status: '草稿', stock: 0, imageUrl: 'https://placehold.co/40x40.png', 'data-ai-hint': 'pet collar' },
+];
+
 const statusVariantMap: { [key: string]: 'secondary' | 'outline' | 'default' | 'destructive' } = {
   '已上架': 'secondary',
   '审核中': 'default',
   '草稿': 'outline',
   '库存低': 'destructive',
 };
-
 
 export default function SupplierCenterPage() {
     const [supplierInfo, setSupplierInfo] = useState(initialSupplierInfo);
@@ -62,15 +61,15 @@ export default function SupplierCenterPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="text-center">
         <h1 className="text-3xl font-bold">供应商中心</h1>
-        <p className="text-muted-foreground">管理您的产品数据，为AI智能分析和前端展示提供数据源。</p>
+        <p className="text-muted-foreground">在此管理供应商信息，或进行批量导入导出操作。</p>
       </div>
-      <Tabs defaultValue="basic-info" className="w-full">
+      <Tabs defaultValue="bulk-processing" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="basic-info"><User className="mr-2 h-4 w-4" />基本信息</TabsTrigger>
-          <TabsTrigger value="product-management"><List className="mr-2 h-4 w-4" />产品数据管理</TabsTrigger>
-          <TabsTrigger value="bulk-import"><Upload className="mr-2 h-4 w-4" />批量数据导入</TabsTrigger>
+          <TabsTrigger value="products-services"><List className="mr-2 h-4 w-4" />商品/服务</TabsTrigger>
+          <TabsTrigger value="bulk-processing"><Upload className="mr-2 h-4 w-4" />批量处理</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic-info" className="mt-4">
@@ -153,7 +152,7 @@ export default function SupplierCenterPage() {
             </Card>
         </TabsContent>
 
-        <TabsContent value="product-management" className="mt-4">
+        <TabsContent value="products-services" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>我的产品</CardTitle>
@@ -161,11 +160,7 @@ export default function SupplierCenterPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                <div className="relative w-full sm:max-w-xs">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="搜索产品..." className="pl-8" />
-                </div>
-                <Button className="w-full sm:w-auto">
+                 <Button className="w-full sm:w-auto">
                   <PlusCircle className="mr-2 h-4 w-4" />
                   添加新产品
                 </Button>
@@ -210,7 +205,7 @@ export default function SupplierCenterPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="bulk-import" className="mt-4">
+        <TabsContent value="bulk-processing" className="mt-4">
            <DataProcessor />
         </TabsContent>
       </Tabs>
