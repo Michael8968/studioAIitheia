@@ -13,6 +13,7 @@ import Image from 'next/image';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { DataProcessor } from '@/components/features/data-processor';
+import { useAuthStore } from '@/store/auth';
 
 const initialSupplierInfo = [
     { id: 'info-1', key: '公司名称', value: '创新科技' },
@@ -38,6 +39,7 @@ const statusVariantMap: { [key: string]: 'secondary' | 'outline' | 'default' | '
 };
 
 export default function SupplierCenterPage() {
+    const { role } = useAuthStore();
     const [supplierInfo, setSupplierInfo] = useState(initialSupplierInfo);
     const [newFieldKey, setNewFieldKey] = useState('');
     const [newFieldValue, setNewFieldValue] = useState('');
@@ -58,6 +60,8 @@ export default function SupplierCenterPage() {
             setIsDialogOpen(false);
         }
     };
+    
+    const isAdmin = role === 'admin';
 
   return (
     <div className="space-y-6">
@@ -65,11 +69,11 @@ export default function SupplierCenterPage() {
         <h1 className="text-3xl font-bold">供应商中心</h1>
         <p className="text-muted-foreground">在此管理供应商信息，或进行批量导入导出操作。</p>
       </div>
-      <Tabs defaultValue="bulk-processing" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="basic-info" className="w-full">
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="basic-info"><User className="mr-2 h-4 w-4" />基本信息</TabsTrigger>
           <TabsTrigger value="products-services"><List className="mr-2 h-4 w-4" />商品/服务</TabsTrigger>
-          <TabsTrigger value="bulk-processing"><Upload className="mr-2 h-4 w-4" />批量处理</TabsTrigger>
+          {isAdmin && <TabsTrigger value="bulk-processing"><Upload className="mr-2 h-4 w-4" />批量处理</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="basic-info" className="mt-4">
@@ -205,9 +209,11 @@ export default function SupplierCenterPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="bulk-processing" className="mt-4">
-           <DataProcessor />
-        </TabsContent>
+        {isAdmin && 
+            <TabsContent value="bulk-processing" className="mt-4">
+               <DataProcessor />
+            </TabsContent>
+        }
       </Tabs>
     </div>
   )
