@@ -160,7 +160,7 @@ function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: R
                                 <AvatarFallback>{creative.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p className="font-bold">{creative.name} <Badge variant="outline" className="ml-2">{creative.type === 'creator' ? '创意者' : '供应商'}</Badge></p>
+                                <div className="font-bold flex items-center">{creative.name} <Badge variant="outline" className="ml-2">{creative.type === 'creator' ? '创意者' : '供应商'}</Badge></div>
                                 <p className="text-xs text-muted-foreground">{creative.specialty}</p>
                             </div>
                         </div>
