@@ -10,18 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Star, Save, ShieldBan, ShieldCheck, Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { type Role, type User, getUsers } from "@/store/auth";
-
-type UserStatus = "正常" | "已暂停" | "黑名单";
-
-// Mock status data, as it's not part of the core user model yet.
-const mockUserStatuses: { [key: string]: { status: UserStatus; rating: number; } } = {
-  'admin-1': { status: '正常', rating: 5 },
-  'supplier-1': { status: '正常', rating: 4 },
-  'creator-1': { status: '正常', rating: 5 },
-  'user-1': { status: '已暂停', rating: 3 },
-  'user-2': { id: 'user-2', name: '陈洁', email: 'chen.jie@example.com', role: 'user', status: '黑名单', rating: 1, avatar: 'female user' },
-};
+import { type Role, type User, getUsers, type UserStatus } from "@/store/auth";
 
 
 const statusVariantMap: { [key in UserStatus]: "default" | "secondary" | "destructive" } = {
@@ -55,14 +44,25 @@ export default function PermissionsPage() {
     setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
   };
 
-  const getStatus = (userId: string): UserStatus => mockUserStatuses[userId]?.status || '正常';
-  const getRating = (userId: string): number => mockUserStatuses[userId]?.rating || 0;
   const getAvatar = (role: Role, name: string): string => {
       if (role === 'admin') return 'male administrator';
       if (role === 'supplier') return 'technology logo';
-      if (role === 'creator') return 'female creator';
-      if (role === 'user' && name === '张伟') return 'male user';
-      if (role === 'user' && name === '陈洁') return 'female user';
+      if (role === 'creator') {
+          const creatorMap: {[key: string]: string} = {
+              '爱丽丝': 'female creator',
+              '鲍勃': 'male designer',
+              '查理': 'male artist',
+              '戴安娜': 'female artist',
+          }
+          return creatorMap[name] || 'female creator';
+      };
+      if (role === 'user') {
+          const userMap: {[key: string]: string} = {
+              '张伟': 'male user',
+              '陈洁': 'female user',
+          }
+          return userMap[name] || 'user avatar';
+      };
       return 'user avatar';
   }
 
@@ -108,7 +108,7 @@ export default function PermissionsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusVariantMap[getStatus(user.id)]} className={getStatus(user.id) === '正常' ? 'bg-green-500' : ''}>{getStatus(user.id)}</Badge>
+                      <Badge variant={statusVariantMap[user.status || '正常']} className={(user.status || '正常') === '正常' ? 'bg-green-500' : ''}>{user.status || '正常'}</Badge>
                     </TableCell>
                     <TableCell>
                       <Select defaultValue={user.role} onValueChange={(newRole) => handleRoleChange(user.id, newRole as Role)} disabled={user.role === 'admin'}>
@@ -126,7 +126,7 @@ export default function PermissionsPage() {
                     <TableCell>
                       <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`h-4 w-4 ${i < getRating(user.id) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/30'}`} />
+                              <Star key={i} className={`h-4 w-4 ${i < (user.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/30'}`} />
                           ))}
                       </div>
                     </TableCell>
@@ -139,7 +139,7 @@ export default function PermissionsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem><Save className="mr-2 h-4 w-4"/> 保存角色</DropdownMenuItem>
-                          {getStatus(user.id) !== '已暂停' ? 
+                          {(user.status || '正常') !== '已暂停' ? 
                               <DropdownMenuItem><ShieldBan className="mr-2 h-4 w-4"/> 暂停用户</DropdownMenuItem>
                               : <DropdownMenuItem><ShieldCheck className="mr-2 h-4 w-4"/> 重新激活</DropdownMenuItem>
                           }

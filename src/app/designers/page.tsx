@@ -11,14 +11,6 @@ import { useRouter } from "next/navigation";
 import { type User, getUsers } from '@/store/auth';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Mock designer-specific data, as it's not in the core user model yet.
-const mockDesignerDetails: { [key: string]: { rating: number; online: boolean; desc: string; tags: string[]; avatar: string } } = {
-  'creator-1': { rating: 4.9, online: true, desc: '10年以上角色设计经验，专精于奇幻与科幻风格。', tags: ['3D角色', '科幻', '风格化'], avatar: 'female creator' },
-  'creator-2': { rating: 4.8, online: false, desc: '建筑可视化与写实渲染专家。', tags: ['建筑可视化', '写实', 'UE引擎'], avatar: 'male designer' },
-  'creator-3': { rating: 5.0, online: true, desc: '热衷于创作游戏可用资产与环境。', tags: ['游戏资产', 'PBR', 'Blender'], avatar: 'male artist' },
-  'creator-4': { rating: 4.7, online: true, desc: '动态图形与抽象3D艺术专家。', tags: ['抽象', 'Houdini', '动态设计'], avatar: 'female artist' },
-};
-
 function DesignerCardSkeleton() {
     return (
         <Card className="flex flex-col">
@@ -68,10 +60,16 @@ export default function DesignersPage() {
         fetchDesigners();
     }, []);
 
-    const getDesignerDetails = (userId: string) => {
-        return mockDesignerDetails[userId] || { rating: 4.5, online: false, desc: '暂无详细描述。', tags: ['暂无标签'], avatar: 'user avatar' };
+    const getAvatar = (name: string): string => {
+        const nameMap: { [key: string]: string } = {
+            '爱丽丝': 'female creator',
+            '鲍勃': 'male designer',
+            '查理': 'male artist',
+            '戴安娜': 'female artist',
+        };
+        return nameMap[name] || 'user avatar';
     };
-
+    
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -89,46 +87,43 @@ export default function DesignersPage() {
                 {isLoading ? (
                     Array.from({ length: 4 }).map((_, index) => <DesignerCardSkeleton key={index} />)
                 ) : (
-                    designers.map(designer => {
-                        const details = getDesignerDetails(designer.id);
-                        return (
-                            <Card key={designer.id} className="flex flex-col">
-                                <CardHeader className="flex-row items-start gap-4 space-y-0">
-                                    <Image src={`https://placehold.co/64x64.png`} alt={designer.name} width={64} height={64} className="rounded-full" data-ai-hint={details.avatar} />
-                                    <div className="flex-1">
-                                        <CardTitle className="text-xl">{designer.name}</CardTitle>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                            <span>{details.rating}</span>
-                                            <span className="text-xs">/ 5.0</span>
-                                        </div>
-                                        <Badge variant={details.online ? 'default' : 'outline'} className="mt-1 bg-green-500 hover:bg-green-600 text-white data-[state=false]:bg-muted data-[state=false]:text-muted-foreground">
-                                            <Circle className={`mr-2 h-2 w-2 ${details.online ? 'fill-white' : 'fill-muted-foreground'}`} />
-                                            {details.online ? '在线' : '离线'}
-                                        </Badge>
+                    designers.map(designer => (
+                        <Card key={designer.id} className="flex flex-col">
+                            <CardHeader className="flex-row items-start gap-4 space-y-0">
+                                <Image src={`https://placehold.co/64x64.png`} alt={designer.name} width={64} height={64} className="rounded-full" data-ai-hint={getAvatar(designer.name)} />
+                                <div className="flex-1">
+                                    <CardTitle className="text-xl">{designer.name}</CardTitle>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                        <span>{designer.rating?.toFixed(1)}</span>
+                                        <span className="text-xs">/ 5.0</span>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="flex-grow space-y-4">
-                                    <p className="text-sm text-muted-foreground">{details.desc}</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {details.tags.map(tag => (
-                                            <Badge key={tag} variant="secondary">{tag}</Badge>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="gap-2">
-                                    <Button className="w-full" disabled={!details.online}>
-                                        <Phone className="mr-2 h-4 w-4"/>
-                                        预约
-                                    </Button>
-                                    <Button variant="outline" className="w-full" disabled={!details.online}>
-                                        <MessageSquare className="mr-2 h-4 w-4"/>
-                                        沟通
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        )
-                    })
+                                    <Badge variant={designer.online ? 'default' : 'outline'} className="mt-1 bg-green-500 hover:bg-green-600 text-white data-[state=false]:bg-muted data-[state=false]:text-muted-foreground">
+                                        <Circle className={`mr-2 h-2 w-2 ${designer.online ? 'fill-white' : 'fill-muted-foreground'}`} />
+                                        {designer.online ? '在线' : '离线'}
+                                    </Badge>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex-grow space-y-4">
+                                <p className="text-sm text-muted-foreground">{designer.description}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {designer.tags?.map(tag => (
+                                        <Badge key={tag} variant="secondary">{tag}</Badge>
+                                    ))}
+                                </div>
+                            </CardContent>
+                            <CardFooter className="gap-2">
+                                <Button className="w-full" disabled={!designer.online}>
+                                    <Phone className="mr-2 h-4 w-4"/>
+                                    预约
+                                </Button>
+                                <Button variant="outline" className="w-full" disabled={!designer.online}>
+                                    <MessageSquare className="mr-2 h-4 w-4"/>
+                                    沟通
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    ))
                 )}
             </div>
         </div>
