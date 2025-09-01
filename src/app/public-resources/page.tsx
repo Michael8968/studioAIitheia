@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -87,7 +86,7 @@ export default function PublicResourcesPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchLinks() {
       try {
         setIsLoadingLinks(true);
         const fetchedLinks = await getLinks();
@@ -97,18 +96,22 @@ export default function PublicResourcesPage() {
       } finally {
         setIsLoadingLinks(false);
       }
-
-      try {
-        setIsLoadingApis(true);
-        const fetchedApis = await getApis();
-        setApis(fetchedApis);
-      } catch (error) {
-        toast({ variant: 'destructive', title: '加载失败', description: '无法加载API端点列表' });
-      } finally {
-        setIsLoadingApis(false);
-      }
     }
-    fetchData();
+    
+    async function fetchApis() {
+        try {
+            setIsLoadingApis(true);
+            const fetchedApis = await getApis();
+            setApis(fetchedApis);
+        } catch (error) {
+            toast({ variant: 'destructive', title: '加载失败', description: '无法加载API端点列表' });
+        } finally {
+            setIsLoadingApis(false);
+        }
+    }
+
+    fetchLinks();
+    fetchApis();
   }, [toast]);
 
   const handleExport = () => {
@@ -182,6 +185,8 @@ export default function PublicResourcesPage() {
                            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                         </TableCell>
                     </TableRow>
+                  ) : links.length === 0 ? (
+                    <TableRow><TableCell colSpan={4} className="h-24 text-center">暂无链接。</TableCell></TableRow>
                   ) : links.map((link) => (
                     <TableRow key={link.id}>
                       <TableCell>{link.name}</TableCell>
@@ -221,6 +226,8 @@ export default function PublicResourcesPage() {
                            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                         </TableCell>
                     </TableRow>
+                  ) : apis.length === 0 ? (
+                    <TableRow><TableCell colSpan={4} className="h-24 text-center">暂无API。</TableCell></TableRow>
                   ) : apis.map((api) => (
                     <TableRow key={api.id}>
                       <TableCell>{api.name}</TableCell>
