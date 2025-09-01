@@ -42,7 +42,7 @@ export default function PermissionsPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [toast]);
+  }, []);
 
 
   const handleFieldChange = (userId: string, field: keyof User, value: any) => {
@@ -232,5 +232,3 @@ export default function PermissionsPage() {
     </div>
   );
 }
-
-    
