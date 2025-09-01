@@ -42,7 +42,7 @@ type ProductService = {
 };
 
 const initialProductService = (): ProductService => ({
-  id: `product_${Date.now()}`,
+  id: `product_${Date.now()}_${Math.random()}`,
   name: '新产品/服务',
   description: '详细描述您的产品或服务。',
   price: '0.00',
@@ -79,17 +79,17 @@ const mediaSlotLabels: {[key: string]: string} = {
     pano: '全景', top: '上', bottom: '下', left: '左', right: '右', front: '前', back: '后'
 }
 
-function SupplementaryFieldsManager({ fields, setFields, objectType }: { fields: SupplementaryField[], setFields: (fields: SupplementaryField[]) => void, objectType: string }) {
+function SupplementaryFieldsManager({ fields, onUpdate, objectType }: { fields: SupplementaryField[], onUpdate: (fields: SupplementaryField[]) => void, objectType: string }) {
     const addField = () => {
-        setFields([...fields, { id: `${objectType}_sup_${Date.now()}`, key: '', value: '', mapping: '' }]);
+        onUpdate([...fields, { id: `${objectType}_sup_${Date.now()}`, key: '', value: '', mapping: '' }]);
     };
 
     const updateField = (id: string, newKey: string, newValue: any) => {
-        setFields(fields.map(f => f.id === id ? { ...f, [newKey]: newValue } : f));
+        onUpdate(fields.map(f => f.id === id ? { ...f, [newKey]: newValue } : f));
     };
 
     const removeField = (id: string) => {
-        setFields(fields.filter(f => f.id !== id));
+        onUpdate(fields.filter(f => f.id !== id));
     };
 
     return (
@@ -199,7 +199,7 @@ function ProductServiceItem({ product, onUpdate, onRemove }: { product: ProductS
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-                 <SupplementaryFieldsManager fields={product.supplementaryFields} setFields={setProductSupplementaryFields} objectType={`product_${product.id}`} />
+                 <SupplementaryFieldsManager fields={product.supplementaryFields} onUpdate={setProductSupplementaryFields} objectType={`product_${product.id}`} />
             </CardContent>
         </Card>
     );
@@ -213,16 +213,20 @@ export default function SuppliersPage() {
 
 
     const addProduct = () => {
-        setProducts([...products, initialProductService()]);
+        setProducts(prev => [...prev, initialProductService()]);
     };
     
     const updateProduct = (updatedProduct: ProductService) => {
-        setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+        setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
     }
 
     const removeProduct = (id: string) => {
-        setProducts(products.filter(p => p.id !== id));
+        setProducts(prev => prev.filter(p => p.id !== id));
     };
+
+    const handleInfoSupFieldsUpdate = (fields: SupplementaryField[]) => {
+        setInfoSupplementaryFields(fields);
+    }
 
     if (role !== 'supplier' && role !== 'admin') {
          return (
@@ -285,7 +289,7 @@ export default function SuppliersPage() {
                                     <Textarea id="companyBio" rows={5} defaultValue="一家领先的创新电子元件制造商，拥有超过十年的历史。我们专注于研发和生产高品质的传感器和微控制器，服务于全球的汽车、消费电子和工业自动化行业。"/>
                                 </div>
                            </div>
-                           <SupplementaryFieldsManager fields={infoSupplementaryFields} setFields={setInfoSupplementaryFields} objectType="info" />
+                           <SupplementaryFieldsManager fields={infoSupplementaryFields} onUpdate={handleInfoSupFieldsUpdate} objectType="info" />
                         </CardContent>
                          <CardFooter className="flex justify-end">
                             <Button>保存基本信息</Button>
