@@ -33,7 +33,7 @@ type AuthState = {
  * 注意：这是您需要在Firestore的`users`集合中创建的数据的示例。
  * 应用现在将直接从Firestore读取数据。
  * =================================================================
-const allMockUsers: User[] = [
+const allMockUsersForFirestore = [
   // Admins
   { id: 'admin-1', name: '李明', email: 'li.ming@example.com', role: 'admin', status: '正常', rating: 5, online: true, specialty: '平台运营', description: '负责平台的日常运营和管理。' },
   
