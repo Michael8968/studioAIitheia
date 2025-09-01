@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
@@ -8,6 +9,8 @@ export type User = {
   name: string;
   email: string;
   role: Role;
+  // Creator/Supplier specific fields can be added here later
+  specialty?: string; 
 };
 
 type AuthState = {
@@ -18,10 +21,22 @@ type AuthState = {
 };
 
 // This now acts as our mock database table for users.
-const allMockUsers: Record<string, Omit<User, 'role' | 'id'> & {role: Role}> = {
+const allMockUsers: Record<string, Omit<User, 'id'>> = {
+  // Admins
   'admin-1': { name: '李明', email: 'li.ming@example.com', role: 'admin' },
-  'supplier-1': { name: '创新科技', email: 'contact@chuangxin.tech', role: 'supplier' },
-  'creator-1': { name: '王芳', email: 'wang.fang@example.com', role: 'creator' },
+  
+  // Suppliers
+  'supplier-1': { name: '创新科技', email: 'contact@chuangxin.tech', role: 'supplier', specialty: '高精度3D打印' },
+  'supplier-2': { name: '快速原型公司', email: 'info@rapid-proto.com', role: 'supplier', specialty: 'SLA & FDM 打印' },
+
+  // Creators
+  'creator-1': { name: '爱丽丝', email: 'alice@example.com', role: 'creator', specialty: '奇幻与科幻角色设计' },
+  'creator-2': { name: '鲍勃', email: 'bob@example.com', role: 'creator', specialty: '建筑可视化' },
+  'creator-3': { name: '查理', email: 'charlie@example.com', role: 'creator', specialty: '游戏资产' },
+  'creator-4': { name: '戴安娜', email: 'diana@example.com', role: 'creator', specialty: '动态图形与抽象3D艺术' },
+
+
+  // Users
   'user-1': { name: '张伟', email: 'zhang.wei@example.com', role: 'user' },
   'user-2': { name: '陈洁', email: 'chen.jie@example.com', role: 'user' },
 };
