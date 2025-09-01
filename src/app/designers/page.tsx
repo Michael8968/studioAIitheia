@@ -88,6 +88,10 @@ export default function DesignersPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {isLoading ? (
                     Array.from({ length: 4 }).map((_, index) => <DesignerCardSkeleton key={index} />)
+                ) : designers.length === 0 ? (
+                    <div className="col-span-full text-center py-12 text-muted-foreground">
+                        <p>暂无创意设计师信息。</p>
+                    </div>
                 ) : (
                     designers.map(designer => (
                         <Card key={designer.id} className="flex flex-col">
@@ -131,3 +135,5 @@ export default function DesignersPage() {
         </div>
     );
 }
+
+    

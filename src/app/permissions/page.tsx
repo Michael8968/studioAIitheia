@@ -42,7 +42,7 @@ export default function PermissionsPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [toast]);
 
 
   const handleFieldChange = (userId: string, field: keyof User, value: any) => {
@@ -187,6 +187,7 @@ export default function PermissionsPage() {
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" disabled={user.role === 'admin'}>
                                 <MoreHorizontal className="h-4 w-4" />
+                                 <span className="sr-only">打开操作菜单</span>
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -231,3 +232,5 @@ export default function PermissionsPage() {
     </div>
   );
 }
+
+    

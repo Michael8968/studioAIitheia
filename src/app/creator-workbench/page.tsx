@@ -20,6 +20,7 @@ export default function CreatorWorkbenchPage() {
 
     useEffect(() => {
         async function fetchTasks() {
+            if (!user) return;
             setIsLoading(true);
             try {
                 const allDemands = await getDemands();
@@ -35,12 +36,10 @@ export default function CreatorWorkbenchPage() {
             }
         }
 
-        if (user) {
-            fetchTasks();
-        }
+        fetchTasks();
     }, [user, toast]);
 
-    if (role !== 'creator' && role !== 'admin') {
+    if (!user || (role !== 'creator' && role !== 'admin')) {
         return (
             <div className="flex items-center justify-center h-full">
                 <Card className="w-full max-w-md">
@@ -145,3 +144,5 @@ export default function CreatorWorkbenchPage() {
     </div>
   );
 }
+
+    

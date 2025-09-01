@@ -409,9 +409,15 @@ export default function DemandPoolPage() {
                             <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                         </TableCell>
                     </TableRow>
+                ) : demands.length === 0 ? (
+                    <TableRow>
+                        <TableCell colSpan={role === 'admin' ? 7 : 6} className="h-24 text-center">
+                            暂无需求。
+                        </TableCell>
+                    </TableRow>
                 ) : (
                     demands.map((demand) => (
-                      <TableRow key={demand.id} data-state={selectedRows.includes(demand.id) && "selected"}>
+                      <TableRow key={demand.id} data-state={selectedRows.includes(demand.id) ? "selected" : undefined}>
                         {role === 'admin' && (
                           <TableCell>
                             <Checkbox
@@ -435,6 +441,7 @@ export default function DemandPoolPage() {
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="icon">
                                             <MoreHorizontal className="h-4 w-4" />
+                                            <span className="sr-only">打开操作菜单</span>
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
@@ -490,3 +497,5 @@ export default function DemandPoolPage() {
     </>
   );
 }
+
+    
