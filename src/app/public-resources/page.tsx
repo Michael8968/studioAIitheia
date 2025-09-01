@@ -22,6 +22,7 @@ const mockApis = [
 ];
 
 function ImportDialog() {
+    const [open, setOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const { toast } = useToast();
 
@@ -46,10 +47,12 @@ function ImportDialog() {
             title: '导入成功',
             description: `${file.name} 已被成功导入。`,
         });
+        setFile(null);
+        setOpen(false);
     };
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline"><Upload className="mr-2 h-4 w-4"/> 导入</Button>
             </DialogTrigger>
