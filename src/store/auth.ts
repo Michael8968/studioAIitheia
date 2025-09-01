@@ -25,10 +25,11 @@ type AuthState = {
   logout: () => void;
 };
 
-// This now acts as our mock database table for users.
+// This is a placeholder for our mock database table for users.
+// In a real full-stack application, this would be a Firestore collection.
 const allMockUsers: Record<string, Omit<User, 'id' | 'role'> & { role: Role }> = {
   // Admins
-  'admin-1': { name: '李明', email: 'li.ming@example.com', role: 'admin', status: '正常', rating: 5, online: true, specialty: '平台运营' },
+  'admin-1': { name: '李明', email: 'li.ming@example.com', role: 'admin', status: '正常', rating: 5, online: true, specialty: '平台运营', description: '负责平台的日常运营和管理。' },
   
   // Suppliers
   'supplier-1': { name: '创新科技', email: 'contact@chuangxin.tech', role: 'supplier', specialty: '高精度3D打印', status: '正常', rating: 4.8, online: true, description: '一家领先的创新电子元件制造商，拥有超过十年的历史。' },
@@ -41,14 +42,14 @@ const allMockUsers: Record<string, Omit<User, 'id' | 'role'> & { role: Role }> =
   'creator-4': { name: '戴安娜', email: 'diana@example.com', role: 'creator', specialty: '动态图形与抽象3D艺术', description: '动态图形与抽象3D艺术专家。', tags: ['抽象', 'Houdini', '动态设计'], rating: 4.7, online: true, status: '正常' },
 
   // Users
-  'user-1': { name: '张伟', email: 'zhang.wei@example.com', role: 'user', status: '正常', rating: 3, online: false },
-  'user-2': { name: '陈洁', email: 'chen.jie@example.com', role: 'user', status: '正常', rating: 4, online: true },
+  'user-1': { name: '张伟', email: 'zhang.wei@example.com', role: 'user', status: '正常', rating: 3, online: false, description: '一个普通的用户。' },
+  'user-2': { name: '陈洁', email: 'chen.jie@example.com', role: 'user', status: '正常', rating: 4, online: true, description: '一个活跃的用户。' },
 };
 
 
 /**
  * Simulates fetching all users from a database.
- * In a real application, this would be a fetch call to a backend API.
+ * In a real application, this would be a fetch call to a backend API (e.g., a Firebase Function or Next.js API route that interacts with Firestore).
  * @returns A promise that resolves to an array of all users.
  */
 export async function getUsers(): Promise<User[]> {
