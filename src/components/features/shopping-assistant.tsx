@@ -19,6 +19,8 @@ import { Badge } from '../ui/badge';
 import { useAuthStore, getUsers, type User } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '../ui/separator';
+import { addDemand } from '@/store/demands';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   description: z.string().min(1, { message: '请输入您要搜索的内容' }),
@@ -338,6 +340,8 @@ function CustomServiceConnector({ lastUserDemand }: { lastUserDemand: string }) 
 
 
 export function ShoppingAssistant() {
+    const { user } = useAuthStore();
+    const router = useRouter();
     const [messages, setMessages] = useState<Message[]>([
         { type: 'ai', profile: null, recommendations: [] }
     ]);
@@ -351,11 +355,41 @@ export function ShoppingAssistant() {
     });
     const {formState: { isSubmitting }} = form;
 
-    const handlePublishToDemandPool = () => {
-        toast({
-            title: '功能正在开发中',
-            description: '很快您就可以将需求一键发布到需求池了！',
-        });
+    const handlePublishToDemandPool = async () => {
+        if (!lastUserDemand) {
+            toast({
+                variant: 'destructive',
+                title: '无法发布',
+                description: '没有可以发布的需求内容。',
+            });
+            return;
+        }
+
+        try {
+            await addDemand({
+                title: `来自AI助手: ${lastUserDemand.substring(0, 20)}...`,
+                description: lastUserDemand,
+                category: 'AI生成',
+                budget: '待议',
+                authorId: user?.id
+            });
+            toast({
+                title: '发布成功!',
+                description: '您的需求已发布到需求池，很快就会有专业人士与您联系。',
+                action: (
+                    <Button variant="outline" size="sm" onClick={() => router.push('/demand-pool')}>
+                        前往查看
+                    </Button>
+                ),
+            });
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: '发布失败',
+                description: '抱歉，发布需求时遇到问题，请稍后再试。',
+            });
+            console.error("Failed to publish to demand pool:", error);
+        }
     };
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {

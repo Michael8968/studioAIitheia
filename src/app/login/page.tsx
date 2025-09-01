@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -29,7 +28,7 @@ const roles: {
   },
   {
     id: 'creator-1',
-    name: '王芳 (创意者)',
+    name: '爱丽丝 (创意者)',
     role: 'creator',
     'data-ai-hint': 'female creator',
   },
@@ -44,8 +43,8 @@ const roles: {
 const roleRedirectMap: Record<Role, string> = {
     admin: '/',
     user: '/',
-    creator: '/',
-    supplier: '/',
+    creator: '/creator-workbench',
+    supplier: '/suppliers',
 }
 
 export default function LoginPage() {
@@ -71,7 +70,7 @@ export default function LoginPage() {
             <Card key={r.role} className="flex flex-col text-center items-center hover:shadow-xl transition-shadow duration-300 rounded-xl">
                 <CardHeader>
                     <div className="relative mx-auto mb-4 h-24 w-24">
-                        <Image src={`https://placehold.co/100x100.png`} alt={`${r.name} avatar`} layout="fill" className="rounded-full object-cover" data-ai-hint={r['data-ai-hint']} />
+                        <Image src={`https://placehold.co/100x100.png`} alt={`${r.name} avatar`} width={100} height={100} className="rounded-full object-cover" data-ai-hint={r['data-ai-hint']} />
                     </div>
                     <CardTitle className="font-headline">{r.name}</CardTitle>
                 </CardHeader>
