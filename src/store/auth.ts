@@ -24,7 +24,7 @@ export type User = {
 type AuthState = {
   role: Role | null;
   user: User | null;
-  login: (userId: string) => Promise<void>;
+  login: (userId: string, role: Role) => Promise<void>;
   logout: () => void;
 };
 
@@ -130,7 +130,9 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       role: null,
       user: null,
-      login: async (userId: string) => {
+      login: async (userId: string, role: Role) => {
+        // The `role` parameter is now used for routing, but the authoritative user data
+        // comes directly from Firestore, ensuring consistency.
         try {
             const userData = await getUserById(userId);
             if (userData) {
