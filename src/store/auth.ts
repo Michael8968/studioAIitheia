@@ -1,6 +1,9 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+
 
 export type Role = 'admin' | 'supplier' | 'user' | 'creator';
 export type UserStatus = "正常" | "已暂停" | "黑名单";
@@ -21,12 +24,15 @@ export type User = {
 type AuthState = {
   role: Role | null;
   user: User | null;
-  login: (userId: string, role: Role) => void;
+  login: (userId: string, role: Role) => Promise<void>;
   logout: () => void;
 };
 
-// This is a placeholder for our mock database table for users.
-// In a real full-stack application, this would be a Firestore collection.
+/*
+ * =================================================================
+ * 注意：这是您需要在Firestore的`users`集合中创建的数据的示例。
+ * 应用现在将直接从Firestore读取数据。
+ * =================================================================
 const allMockUsers: User[] = [
   // Admins
   { id: 'admin-1', name: '李明', email: 'li.ming@example.com', role: 'admin', status: '正常', rating: 5, online: true, specialty: '平台运营', description: '负责平台的日常运营和管理。' },
@@ -45,28 +51,65 @@ const allMockUsers: User[] = [
   { id: 'user-1', name: '张伟', email: 'zhang.wei@example.com', role: 'user', status: '正常', rating: 3, online: false, description: '一个普通的用户。' },
   { id: 'user-2', name: '陈洁', email: 'chen.jie@example.com', role: 'user', status: '正常', rating: 4, online: true, description: '一个活跃的用户。' },
 ];
+*/
 
 
 /**
- * Simulates fetching all users from a database.
- * In a real application, this would be a fetch call to a backend API (e.g., a Firebase Function or Next.js API route that interacts with Firestore).
+ * Fetches all users from the Firestore 'users' collection.
  * @returns A promise that resolves to an array of all users.
  */
 export async function getUsers(): Promise<User[]> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return JSON.parse(JSON.stringify(allMockUsers));
+    try {
+        const usersCollection = collection(db, 'users');
+        const userSnapshot = await getDocs(usersCollection);
+        const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+        return userList;
+    } catch (error) {
+        console.error("Error fetching users from Firestore:", error);
+        // In a real app, you'd want to handle this error more gracefully.
+        // For now, we return an empty array to prevent the app from crashing.
+        return [];
+    }
 }
+
+/**
+ * Fetches a single user by ID from the Firestore 'users' collection.
+ * @param userId The ID of the user to fetch.
+ * @returns A promise that resolves to the user object or null if not found.
+ */
+export async function getUserById(userId: string): Promise<User | null> {
+    try {
+        const userDocRef = doc(db, 'users', userId);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+            return { id: userDocSnap.id, ...userDocSnap.data() } as User;
+        } else {
+            console.log("No such user document!");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user by ID from Firestore:", error);
+        return null;
+    }
+}
+
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       role: null,
       user: null,
-      login: (userId, role) => {
-        const userData = allMockUsers.find(u => u.id === userId);
-        if (userData) {
-          set({ role, user: { ...userData } });
+      login: async (userId: string, role: Role) => {
+        try {
+            const userData = await getUserById(userId);
+            if (userData && userData.role === role) {
+              set({ role, user: userData });
+            } else {
+              console.error("Login failed: User not found or role mismatch.");
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
         }
       },
       logout: () => set({ role: null, user: null }),
