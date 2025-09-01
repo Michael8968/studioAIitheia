@@ -55,6 +55,10 @@ export function DataProcessor() {
     try {
       const evaluation = await evaluateSellerData({ sellerData, demandCategories });
       setResults(evaluation);
+      toast({
+        title: '处理成功',
+        description: 'AI已成功分析您的数据。',
+      });
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -99,7 +103,7 @@ export function DataProcessor() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
                 <CardTitle>处理结果</CardTitle>
-                <CardDescription>导入的数据将在此处显示。</CardDescription>
+                <CardDescription>AI 分析的匹配度结果将在此处显示。</CardDescription>
             </div>
             <Button variant="outline" disabled={!results}>
                 <FileOutput className="mr-2 h-4 w-4" />
@@ -110,16 +114,15 @@ export function DataProcessor() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>供应商名称</TableHead>
                   <TableHead>类别</TableHead>
                   <TableHead>匹配度</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
+                  <TableHead className="text-right">AI建议</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                     <TableRow>
-                        <TableCell colSpan={4} className="text-center">
+                        <TableCell colSpan={3} className="text-center">
                             <div className="flex justify-center items-center py-8">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                                 <p className="ml-4 text-muted-foreground">AI 正在分析数据...</p>
@@ -129,8 +132,7 @@ export function DataProcessor() {
                 ) : results && results.length > 0 ? (
                   results.map((result, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{`供应商 ${index + 1}`}</TableCell>
-                      <TableCell>{result.category}</TableCell>
+                      <TableCell className="font-medium">{result.category}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                            <Progress value={result.relevanceScore * 100} className="w-20" />
@@ -138,13 +140,13 @@ export function DataProcessor() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">查看</Button>
+                          <Button variant="ghost" size="sm">查看理由</Button>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                     <TableRow>
-                        <TableCell colSpan={4} className="h-24 text-center">
+                        <TableCell colSpan={3} className="h-24 text-center">
                         暂无数据。请上传文件开始处理。
                         </TableCell>
                     </TableRow>
