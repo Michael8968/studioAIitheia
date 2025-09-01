@@ -193,12 +193,18 @@ type Message = {
     recommendations?: ProductRecommendationsOutput['recommendations'];
 };
 
-function CustomServiceConnector() {
+function CustomServiceConnector({ lastUserDemand }: { lastUserDemand: string }) {
     const [step, setStep] = useState<'initial' | 'input' | 'loading' | 'results'>('initial');
     const [demand, setDemand] = useState('');
     const [designers, setDesigners] = useState<User[]>([]);
     const [supplier, setSupplier] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (lastUserDemand && step === 'input') {
+            setDemand(lastUserDemand);
+        }
+    }, [lastUserDemand, step]);
 
     const getAvatar = (user: User): string => {
         const role = user.role;
@@ -336,6 +342,7 @@ export function ShoppingAssistant() {
         { type: 'ai', profile: null, recommendations: [] }
     ]);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [lastUserDemand, setLastUserDemand] = useState('');
     const { toast } = useToast();
 
     const form = useForm<FormValues>({
@@ -353,6 +360,7 @@ export function ShoppingAssistant() {
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         const userMessageText = data.description;
+        setLastUserDemand(userMessageText);
         const userImageFile = data.image;
 
         let userMessageImageUrl: string | null = null;
@@ -509,10 +517,8 @@ export function ShoppingAssistant() {
                 </Card>
             </div>
             <div className="lg:col-span-1 space-y-8">
-                <CustomServiceConnector />
+                <CustomServiceConnector lastUserDemand={lastUserDemand} />
             </div>
         </div>
     );
 }
-
-    

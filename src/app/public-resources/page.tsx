@@ -11,14 +11,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
 
-const mockLinks = [
+export const mockLinks = [
   { id: 'L001', name: 'ShadCN UI 文档', url: 'https://ui.shadcn.com', desc: '组件库文档。' },
   { id: 'L002', name: 'Lucide 图标集', url: 'https://lucide.dev', desc: '项目所使用的图标库。' },
 ];
 
-const mockApis = [
+export const mockApis = [
   { id: 'A001', name: 'Stripe API', endpoint: 'https://api.stripe.com', status: '生效中' },
   { id: 'A002', name: 'Google Maps API', endpoint: 'https://maps.googleapis.com', status: '生效中' },
+  { id: 'A003', name: '内部用户数据API', endpoint: '/api/internal/users', status: '已禁用'},
 ];
 
 function ImportDialog() {

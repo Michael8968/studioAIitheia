@@ -10,6 +10,7 @@ import { Eye, Edit, Ban, Link } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { mockApis } from '../public-resources/page';
 
 type Prompt = {
   id: string;
@@ -24,14 +25,8 @@ const initialMockPrompts: Prompt[] = [
   { id: 'productRecommendationsPrompt', name: '商品推荐器', scope: 'AI购物助手', status: '生效中' },
   { id: 'evaluateSellerDataPrompt', name: '供应商数据评估器', scope: '供应商中心', status: '生效中' },
   { id: 'generate3DModelPrompt', name: '3D模型生成器', scope: '创意者工作台', status: '生效中' },
+  { id: 'recommendCreativesPrompt', name: '创意执行者推荐器', scope: '需求池', status: '生效中' },
 ];
-
-const mockApis = [
-  { id: 'A001', name: 'Stripe API', endpoint: 'https://api.stripe.com' },
-  { id: 'A002', name: 'Google Maps API', endpoint: 'https://maps.googleapis.com' },
-  { id: 'A003', name: '内部用户数据API', endpoint: '/api/internal/users' },
-];
-
 
 function PromptConfigDialog({ prompt, open, onOpenChange, onSave }: { prompt: Prompt | null, open: boolean, onOpenChange: (open: boolean) => void, onSave: (promptId: string, apiEndpoint: string) => void }) {
     const [selectedApi, setSelectedApi] = useState(prompt?.apiEndpoint || '');
