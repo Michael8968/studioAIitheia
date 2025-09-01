@@ -21,7 +21,17 @@ import type { CheckedState } from '@radix-ui/react-checkbox';
 import { recommendCreatives, type RecommendCreativesOutput } from '@/ai/flows/recommend-creatives';
 import { useToast } from '@/hooks/use-toast';
 
-const mockDemands = [
+type Demand = {
+  id: string;
+  title: string;
+  description: string;
+  budget: string;
+  category: string;
+  status: '开放中' | '洽谈中' | '已完成' | '已关闭';
+  created: string;
+};
+
+const initialDemands: Demand[] = [
   { id: 'D001', title: '为新的咖啡品牌设计一个定制logo', description: '我们需要一个现代、简约且令人难忘的logo，要能体现咖啡的温暖和社区感。颜色以棕色和米色为主。', budget: '¥3,500 - ¥7,000', category: '平面设计', status: '开放中', created: '2024-08-01' },
   { id: 'D002', title: '开发一款宠物看护服务的移动应用', description: '一款iOS和Android应用，功能包括用户注册、宠物档案管理、服务预订、在线支付和实时聊天。', budget: '¥56,000 - ¥84,000', category: '软件开发', status: '洽谈中', created: '2024-07-28' },
   { id: 'D003', title: '为一个新奇小工具寻找3D打印原型', description: '一个手持式电子产品的外壳原型，需要高精度打印，材料为ABS或类似强度的塑料。需要提供3D模型文件。', budget: '¥10,000 - ¥17,500', category: '3D建模', status: '开放中', created: '2024-07-25' },
@@ -29,15 +39,31 @@ const mockDemands = [
   { id: 'D005', title: '寻找环保包装的供应商', description: '为化妆品系列寻找可持续、可回收的包装解决方案，包括瓶子、罐子和外包装盒。', budget: '可议价', category: '采购', status: '开放中', created: '2024-08-05' },
 ];
 
-const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
+const statusVariantMap: { [key in Demand['status']]: "default" | "secondary" | "destructive" | "outline" } = {
   '开放中': 'default',
   '洽谈中': 'secondary',
   '已完成': 'outline',
+  '已关闭': 'destructive',
 };
 
-function DemandFormDialog() {
+function DemandFormDialog({ onAddDemand }: { onAddDemand: (demand: Omit<Demand, 'id' | 'created' | 'status'>) => void }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const [budget, setBudget] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleSubmit = () => {
+    onAddDemand({ title, category, budget, description });
+    setTitle('');
+    setCategory('');
+    setBudget('');
+    setDescription('');
+    setOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -54,23 +80,24 @@ function DemandFormDialog() {
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="title" className="text-right">标题</Label>
-            <Input id="title" placeholder="例如：定制logo设计" className="col-span-3" />
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="例如：定制logo设计" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="category" className="text-right">类别</Label>
-            <Input id="category" placeholder="例如：平面设计" className="col-span-3" />
+            <Input id="category" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="例如：平面设计" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="budget" className="text-right">预算</Label>
-            <Input id="budget" placeholder="例如：¥3,500 - ¥7,000" className="col-span-3" />
+            <Input id="budget" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="例如：¥3,500 - ¥7,000" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-start gap-4">
             <Label htmlFor="description" className="text-right pt-2">描述</Label>
-            <Textarea id="description" placeholder="详细描述您的需求..." className="col-span-3" />
+            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="详细描述您的需求..." className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">提交需求</Button>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>取消</Button>
+          <Button type="submit" onClick={handleSubmit}>提交需求</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -78,8 +105,8 @@ function DemandFormDialog() {
 }
 
 type RecommendationDialogProps = {
-  demand: (typeof mockDemands[0]) | null;
-  selectedDemands: (typeof mockDemands[0])[];
+  demand: (Demand) | null;
+  selectedDemands: (Demand)[];
   creatives: User[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -245,8 +272,9 @@ function RecommendationDialog({ demand, selectedDemands, creatives, open, onOpen
 export default function DemandPoolPage() {
   const { role } = useAuthStore();
   const [creatives, setCreatives] = useState<User[]>([]);
+  const [demands, setDemands] = useState<Demand[]>(initialDemands);
   const [isRecDialogOpen, setRecDialogOpen] = useState(false);
-  const [selectedDemand, setSelectedDemand] = useState<(typeof mockDemands[0]) | null>(null);
+  const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   
   useEffect(() => {
@@ -262,7 +290,18 @@ export default function DemandPoolPage() {
     fetchCreatives();
   }, []);
 
-  const handleRecommendClick = (demand: typeof mockDemands[0]) => {
+  const addDemand = (newDemandData: Omit<Demand, 'id' | 'created' | 'status'>) => {
+    const newDemand: Demand = {
+        ...newDemandData,
+        id: `D${String(demands.length + 1).padStart(3, '0')}`,
+        status: '开放中',
+        created: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+    };
+    setDemands(prev => [newDemand, ...prev]);
+  };
+
+
+  const handleRecommendClick = (demand: Demand) => {
     setSelectedDemand(demand);
     setSelectedRows([]); // Clear batch selection when opening single
     setRecDialogOpen(true);
@@ -283,13 +322,13 @@ export default function DemandPoolPage() {
 
   const handleSelectAll = (checked: CheckedState) => {
     if (checked) {
-      setSelectedRows(mockDemands.map(d => d.id));
+      setSelectedRows(demands.map(d => d.id));
     } else {
       setSelectedRows([]);
     }
   };
 
-  const selectedDemandsForDialog = mockDemands.filter(d => selectedRows.includes(d.id));
+  const selectedDemandsForDialog = demands.filter(d => selectedRows.includes(d.id));
 
   return (
     <>
@@ -299,7 +338,7 @@ export default function DemandPoolPage() {
             <h1 className="text-3xl font-headline font-bold">需求池</h1>
             <p className="text-muted-foreground">浏览、承接或在生态系统中发布需求。</p>
           </div>
-          {role === 'user' && <DemandFormDialog />}
+          {role === 'user' && <DemandFormDialog onAddDemand={addDemand} />}
         </div>
 
         <Card>
@@ -339,7 +378,7 @@ export default function DemandPoolPage() {
                     <TableHead className="w-[50px]">
                       <Checkbox
                         onCheckedChange={handleSelectAll}
-                        checked={selectedRows.length === mockDemands.length && mockDemands.length > 0}
+                        checked={selectedRows.length === demands.length && demands.length > 0}
                         aria-label="选择全部"
                       />
                     </TableHead>
@@ -353,7 +392,7 @@ export default function DemandPoolPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockDemands.map((demand) => (
+                {demands.map((demand) => (
                   <TableRow key={demand.id} data-state={selectedRows.includes(demand.id) && "selected"}>
                     {role === 'admin' && (
                       <TableCell>
@@ -406,3 +445,5 @@ export default function DemandPoolPage() {
     </>
   );
 }
+
+    
