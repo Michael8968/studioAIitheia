@@ -1,3 +1,4 @@
+
 # AI 智能匹配平台 - V2.0 全栈架构设计文档
 
 ## 1. 概述 (Overview)
@@ -69,8 +70,8 @@
 │   │   ├── features/        # 特定业务功能的大型组件
 │   │   └── ui/              # ShadCN/UI基础组件
 │   ├── hooks/               # 自定义Hooks (e.g., useToast)
-│   ├── lib/                 # 工具函数 (e.g., cn)
-│   └── store/               # 数据服务层 (模拟数据库交互)
+│   ├── lib/                 # 工具函数 (e.g., cn, firebase.ts)
+│   └── store/               # 数据服务层 (与Firestore交互)
 │       ├── auth.ts          # 用户数据获取与认证状态
 │       └── demands.ts       # 需求数据获取与管理
 ├── public/                  # 静态资源
@@ -115,7 +116,7 @@
 | `budget` | `string` | 项目的预算范围。 | "¥3,500 - ¥7,000" |
 | `category` | `string` | 需求所属的类别。 | "平面设计" |
 | `status` | `string` | 需求当前状态: '开放中', '洽谈中', '已完成', '已关闭'。 | "开放中" |
-| `created` | `string` (ISO) | 需求创建的日期 (YYYY-MM-DD)。 | "2024-08-01" |
+| `created` | `Timestamp` | **[重要]** 需求创建的Firestore时间戳。 | `Timestamp(seconds=1690848000, nanoseconds=0)` |
 | `authorId` | `string` | **[关联字段]** 发布该需求的用户ID，关联到`users`集合。 | "userId123" |
 
 ### 4.3. 关联关系 (Relationships)
@@ -129,15 +130,15 @@
 ### 5.1. 数据获取
 
 *   前端客户端组件 (Client Components with `'use client'`) 使用 `useEffect` 钩子在组件挂载时，调用 `src/store/` 目录下的数据服务函数 (如 `getUsers()`, `getDemands()`)。
-*   这些服务函数 (`getUsers`, `getDemands`) 模拟了对后端的异步API请求。在真实的生产环境中，这些函数内部将包含调用 **Firestore SDK** 的代码，以从数据库中获取数据。
-*   加载状态 (`isLoading`) 被广泛用于在数据返回前显示骨架屏或加载指示器，提升用户体验。
+*   这些服务函数 (`getUsers`, `getDemands`) 内部封装了对 **Firestore SDK** 的调用，以从数据库中异步获取真实数据。
+*   加载状态 (`isLoading`) 被广泛用于在数据返回前显示骨架屏或加载指示器，提升用户体验。所有数据获取操作都应被 `try...catch` 块包裹，以处理潜在的后端错误。
 
 ### 5.2. 数据修改
 
 *   **写操作 (创建/更新)**: 用户在UI上执行操作（如发布新需求、保存配置）。
 *   **调用服务函数**: 前端组件调用相应的数据服务函数 (如 `addDemand(...)`)。
-*   **后端处理**: 在生产环境中，这些函数将是 **Next.js Server Actions** 或专门的API路由，它们负责验证数据、执行业务逻辑并与 **Firestore** 进行交互。
-*   **状态更新**: 函数成功返回后，前端组件会更新其本地状态，以即时反映UI的变化。
+*   **后端处理**: 这些服务函数内部使用 **Firestore SDK** (如 `addDoc`, `updateDoc`) 与数据库进行交互，执行业务逻辑。
+*   **状态更新**: 函数成功返回后，前端组件会重新获取数据或更新其本地状态，以即时反映UI的变化。
 
 ---
 
