@@ -1,26 +1,18 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, Upload, Edit, Trash2, Link, Code, UploadCloud, File } from "lucide-react";
+import { Download, Upload, Edit, Trash2, Link, Code, UploadCloud, File, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
+import { getLinks, getApis, type PublicLink, type PublicApi } from '@/store/resources';
+import { Badge } from '@/components/ui/badge';
 
-export const mockLinks = [
-  { id: 'L001', name: 'ShadCN UI 文档', url: 'https://ui.shadcn.com', desc: '组件库文档。' },
-  { id: 'L002', name: 'Lucide 图标集', url: 'https://lucide.dev', desc: '项目所使用的图标库。' },
-];
-
-export const mockApis = [
-  { id: 'A001', name: 'Stripe API', endpoint: 'https://api.stripe.com', status: '生效中' },
-  { id: 'A002', name: 'Google Maps API', endpoint: 'https://maps.googleapis.com', status: '生效中' },
-  { id: 'A003', name: '内部用户数据API', endpoint: '/api/internal/users', status: '已禁用'},
-];
 
 function ImportDialog() {
     const [open, setOpen] = useState(false);
@@ -88,10 +80,43 @@ function ImportDialog() {
 
 export default function PublicResourcesPage() {
   const [activeTab, setActiveTab] = useState('links');
+  const [links, setLinks] = useState<PublicLink[]>([]);
+  const [apis, setApis] = useState<PublicApi[]>([]);
+  const [isLoadingLinks, setIsLoadingLinks] = useState(true);
+  const [isLoadingApis, setIsLoadingApis] = useState(true);
   const { toast } = useToast();
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setIsLoadingLinks(true);
+        const fetchedLinks = await getLinks();
+        setLinks(fetchedLinks);
+      } catch (error) {
+        toast({ variant: 'destructive', title: '加载失败', description: '无法加载外部链接列表' });
+      } finally {
+        setIsLoadingLinks(false);
+      }
+
+      try {
+        setIsLoadingApis(true);
+        const fetchedApis = await getApis();
+        setApis(fetchedApis);
+      } catch (error) {
+        toast({ variant: 'destructive', title: '加载失败', description: '无法加载API端点列表' });
+      } finally {
+        setIsLoadingApis(false);
+      }
+    }
+    fetchData();
+  }, [toast]);
+
   const handleExport = () => {
-    const dataToExport = activeTab === 'links' ? mockLinks : mockApis;
+    const dataToExport = activeTab === 'links' ? links : apis;
+    if (dataToExport.length === 0) {
+      toast({ variant: 'destructive', title: '无数据可导出' });
+      return;
+    }
     const headers = Object.keys(dataToExport[0]);
     const csvContent = [
       headers.join(','),
@@ -151,14 +176,20 @@ export default function PublicResourcesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockLinks.map((link) => (
+                  {isLoadingLinks ? (
+                    <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center">
+                           <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                        </TableCell>
+                    </TableRow>
+                  ) : links.map((link) => (
                     <TableRow key={link.id}>
                       <TableCell>{link.name}</TableCell>
                       <TableCell><a href={link.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{link.url}</a></TableCell>
                       <TableCell>{link.desc}</TableCell>
                       <TableCell className="text-right space-x-1">
                         <Button variant="ghost" size="icon" disabled><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled><Trash2 className="h-4 w-4" /></Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -184,14 +215,24 @@ export default function PublicResourcesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockApis.map((api) => (
+                  {isLoadingApis ? (
+                     <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center">
+                           <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                        </TableCell>
+                    </TableRow>
+                  ) : apis.map((api) => (
                     <TableRow key={api.id}>
                       <TableCell>{api.name}</TableCell>
                       <TableCell className="font-mono text-sm">{api.endpoint}</TableCell>
-                      <TableCell>{api.status}</TableCell>
+                      <TableCell>
+                        <Badge variant={api.status === '生效中' ? 'default' : 'destructive'} className={api.status === '生效中' ? 'bg-green-500' : ''}>
+                          {api.status}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right space-x-1">
                         <Button variant="ghost" size="icon" disabled><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled><Trash2 className="h-4 w-4" /></Button>
                       </TableCell>
                     </TableRow>
                   ))}

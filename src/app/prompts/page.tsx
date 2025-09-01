@@ -1,16 +1,17 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit, Ban, Link } from "lucide-react";
+import { Eye, Edit, Ban, Link, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockApis } from '@/app/public-resources/page';
+import { getApis, type PublicApi } from '@/store/resources';
+import { useToast } from '@/hooks/use-toast';
 
 type Prompt = {
   id: string;
@@ -20,8 +21,9 @@ type Prompt = {
   apiEndpoint?: string;
 };
 
+// This data is static as it represents the Genkit flows defined in the codebase.
 const initialMockPrompts: Prompt[] = [
-  { id: 'userProfilePrompt', name: '用户画像生成器', scope: 'AI购物助手', status: '生效中', apiEndpoint: 'https://api.stripe.com' },
+  { id: 'userProfilePrompt', name: '用户画像生成器', scope: 'AI购物助手', status: '生效中' },
   { id: 'productRecommendationsPrompt', name: '商品推荐器', scope: 'AI购物助手', status: '生效中' },
   { id: 'evaluateSellerDataPrompt', name: '供应商数据评估器', scope: '供应商中心', status: '生效中' },
   { id: 'generate3DModelPrompt', name: '3D模型生成器', scope: '创意者工作台', status: '生效中' },
@@ -30,6 +32,22 @@ const initialMockPrompts: Prompt[] = [
 
 function PromptConfigDialog({ prompt, open, onOpenChange, onSave }: { prompt: Prompt | null, open: boolean, onOpenChange: (open: boolean) => void, onSave: (promptId: string, apiEndpoint: string) => void }) {
     const [selectedApi, setSelectedApi] = useState(prompt?.apiEndpoint || '');
+    const [availableApis, setAvailableApis] = useState<PublicApi[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if(open) {
+            setIsLoading(true);
+            getApis().then(data => {
+                setAvailableApis(data);
+            }).catch(() => {
+                 toast({ variant: "destructive", title: "错误", description: "无法加载可用API列表" });
+            }).finally(() => {
+                setIsLoading(false);
+            })
+        }
+    }, [open, toast]);
 
     if (!prompt) return null;
 
@@ -48,23 +66,25 @@ function PromptConfigDialog({ prompt, open, onOpenChange, onSave }: { prompt: Pr
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4 space-y-4">
-                    <div>
+                   {isLoading ? <div className="flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div> : (
+                     <div>
                         <Label htmlFor="api-select">选择API端点</Label>
                         <Select value={selectedApi} onValueChange={setSelectedApi}>
                             <SelectTrigger id="api-select">
                                 <SelectValue placeholder="选择一个API..." />
                             </SelectTrigger>
                             <SelectContent>
-                                {mockApis.map(api => (
+                                {availableApis.map(api => (
                                     <SelectItem key={api.id} value={api.endpoint}>{api.name} ({api.endpoint})</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
+                   )}
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
-                    <Button onClick={handleSave}>保存配置</Button>
+                    <Button onClick={handleSave} disabled={isLoading}>保存配置</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -123,7 +143,7 @@ export default function PromptsPage() {
                       <Badge variant={prompt.status === '生效中' ? 'default' : 'destructive'} className={prompt.status === '生效中' ? 'bg-green-500' : ''}>{prompt.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-1">
-                      <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" disabled><Eye className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => handleConfigClick(prompt)}><Edit className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled><Ban className="h-4 w-4" /></Button>
                     </TableCell>
