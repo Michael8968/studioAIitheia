@@ -19,7 +19,7 @@ type Prompt = {
   apiEndpoint?: string;
 };
 
-const mockPrompts: Prompt[] = [
+const initialMockPrompts: Prompt[] = [
   { id: 'userProfilePrompt', name: '用户画像生成器', scope: 'AI购物助手', status: '生效中', apiEndpoint: 'https://api.stripe.com' },
   { id: 'productRecommendationsPrompt', name: '商品推荐器', scope: 'AI购物助手', status: '生效中' },
   { id: 'evaluateSellerDataPrompt', name: '供应商数据评估器', scope: '供应商中心', status: '生效中' },
@@ -77,7 +77,7 @@ function PromptConfigDialog({ prompt, open, onOpenChange, onSave }: { prompt: Pr
 }
 
 export default function PromptsPage() {
-  const [prompts, setPrompts] = useState(mockPrompts);
+  const [prompts, setPrompts] = useState(initialMockPrompts);
   const [isConfigOpen, setConfigOpen] = useState(false);
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
 
