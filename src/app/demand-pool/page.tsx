@@ -20,7 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { recommendCreatives, type RecommendCreativesOutput } from '@/ai/flows/recommend-creatives';
 import { useToast } from '@/hooks/use-toast';
-import { initialDemands, type Demand } from '@/store/demands';
+import { getDemands, addDemand, type Demand } from '@/store/demands';
 
 const statusVariantMap: { [key in Demand['status']]: "default" | "secondary" | "destructive" | "outline" } = {
   '开放中': 'default',
@@ -29,20 +29,26 @@ const statusVariantMap: { [key in Demand['status']]: "default" | "secondary" | "
   '已关闭': 'destructive',
 };
 
-function DemandFormDialog({ onAddDemand }: { onAddDemand: (demand: Omit<Demand, 'id' | 'created' | 'status'>) => void }) {
+function DemandFormDialog({ onAddDemand }: { onAddDemand: (demand: Demand) => void }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [budget, setBudget] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSubmit = () => {
-    onAddDemand({ title, category, budget, description });
-    setTitle('');
-    setCategory('');
-    setBudget('');
-    setDescription('');
-    setOpen(false);
+  const handleSubmit = async () => {
+    const newDemandData = { title, category, budget, description };
+    try {
+        const newDemand = await addDemand(newDemandData);
+        onAddDemand(newDemand);
+        setTitle('');
+        setCategory('');
+        setBudget('');
+        setDescription('');
+        setOpen(false);
+    } catch(error) {
+        console.error("Failed to add demand:", error);
+    }
   };
 
   return (
@@ -255,31 +261,30 @@ function RecommendationDialog({ demand, selectedDemands, creatives, open, onOpen
 export default function DemandPoolPage() {
   const { role } = useAuthStore();
   const [creatives, setCreatives] = useState<User[]>([]);
-  const [demands, setDemands] = useState<Demand[]>(initialDemands);
+  const [demands, setDemands] = useState<Demand[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRecDialogOpen, setRecDialogOpen] = useState(false);
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   
   useEffect(() => {
-    async function fetchCreatives() {
+    async function fetchData() {
+        setIsLoading(true);
         try {
-            const allUsers = await getUsers();
+            const [allUsers, allDemands] = await Promise.all([getUsers(), getDemands()]);
             const creativeUsers = allUsers.filter(user => user.role === 'creator' || user.role === 'supplier');
             setCreatives(creativeUsers);
+            setDemands(allDemands);
         } catch (error) {
-            console.error("Failed to fetch creatives:", error);
+            console.error("Failed to fetch page data:", error);
+        } finally {
+            setIsLoading(false);
         }
     }
-    fetchCreatives();
+    fetchData();
   }, []);
 
-  const addDemand = (newDemandData: Omit<Demand, 'id' | 'created' | 'status'>) => {
-    const newDemand: Demand = {
-        ...newDemandData,
-        id: `D${String(demands.length + 1).padStart(3, '0')}`,
-        status: '开放中',
-        created: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
-    };
+  const handleAddDemand = (newDemand: Demand) => {
     setDemands(prev => [newDemand, ...prev]);
   };
 
@@ -321,7 +326,7 @@ export default function DemandPoolPage() {
             <h1 className="text-3xl font-headline font-bold">需求池</h1>
             <p className="text-muted-foreground">浏览、承接或在生态系统中发布需求。</p>
           </div>
-          {role === 'user' && <DemandFormDialog onAddDemand={addDemand} />}
+          {role === 'user' && <DemandFormDialog onAddDemand={handleAddDemand} />}
         </div>
 
         <Card>
@@ -375,42 +380,50 @@ export default function DemandPoolPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {demands.map((demand) => (
-                  <TableRow key={demand.id} data-state={selectedRows.includes(demand.id) && "selected"}>
-                    {role === 'admin' && (
-                      <TableCell>
-                        <Checkbox
-                          onCheckedChange={(checked) => handleSelectRow(demand.id, checked)}
-                          checked={selectedRows.includes(demand.id)}
-                          aria-label={`选择需求 ${demand.title}`}
-                        />
-                      </TableCell>
-                    )}
-                    <TableCell className="font-medium">{demand.title}</TableCell>
-                    <TableCell>{demand.budget}</TableCell>
-                    <TableCell>{demand.category}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariantMap[demand.status] || 'default'}>{demand.status}</Badge>
-                    </TableCell>
-                    <TableCell>{demand.created}</TableCell>
-                    <TableCell className="text-right space-x-1">
-                      {role === 'admin' && (
-                        <>
-                            <Button variant="outline" size="sm" onClick={() => handleRecommendClick(demand)}>
-                                <Send className="mr-2 h-4 w-4" />推荐
-                            </Button>
-                            <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                        </>
-                      )}
-                      {(role === 'supplier' || role === 'creator') && demand.status === '开放中' && (
-                        <Button variant="outline" size="sm"><Milestone className="mr-2 h-4 w-4" />抢单</Button>
-                      )}
-                       {(role === 'supplier' || role === 'creator') && demand.status !== '开放中' && (
-                        <Button variant="outline" size="sm" disabled><Phone className="mr-2 h-4 w-4" />沟通</Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {isLoading ? (
+                    <TableRow>
+                        <TableCell colSpan={role === 'admin' ? 7 : 6} className="h-24 text-center">
+                            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                        </TableCell>
+                    </TableRow>
+                ) : (
+                    demands.map((demand) => (
+                      <TableRow key={demand.id} data-state={selectedRows.includes(demand.id) && "selected"}>
+                        {role === 'admin' && (
+                          <TableCell>
+                            <Checkbox
+                              onCheckedChange={(checked) => handleSelectRow(demand.id, checked)}
+                              checked={selectedRows.includes(demand.id)}
+                              aria-label={`选择需求 ${demand.title}`}
+                            />
+                          </TableCell>
+                        )}
+                        <TableCell className="font-medium">{demand.title}</TableCell>
+                        <TableCell>{demand.budget}</TableCell>
+                        <TableCell>{demand.category}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariantMap[demand.status] || 'default'}>{demand.status}</Badge>
+                        </TableCell>
+                        <TableCell>{demand.created}</TableCell>
+                        <TableCell className="text-right space-x-1">
+                          {role === 'admin' && (
+                            <>
+                                <Button variant="outline" size="sm" onClick={() => handleRecommendClick(demand)}>
+                                    <Send className="mr-2 h-4 w-4" />推荐
+                                </Button>
+                                <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                            </>
+                          )}
+                          {(role === 'supplier' || role === 'creator') && demand.status === '开放中' && (
+                            <Button variant="outline" size="sm"><Milestone className="mr-2 h-4 w-4" />抢单</Button>
+                          )}
+                           {(role === 'supplier' || role === 'creator') && demand.status !== '开放中' && (
+                            <Button variant="outline" size="sm" disabled><Phone className="mr-2 h-4 w-4" />沟通</Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

@@ -9,14 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Milestone, Wand2, Briefcase, FileCheck2, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { initialDemands } from "@/store/demands";
-
-type Task = {
-  id: string;
-  title: string;
-  budget: string;
-  category: string;
-};
+import { getDemands, type Demand } from "@/store/demands";
 
 const initialMockSubmissions = [
     { name: '科幻士兵角色', category: '3D角色', price: '¥8,400', updated: '2024-07-20' },
@@ -26,20 +19,25 @@ const initialMockSubmissions = [
 
 export default function CreatorWorkbenchPage() {
     const { role } = useAuthStore();
-    const [tasks, setTasks] = useState<Task[]>([]);
+    const [tasks, setTasks] = useState<Demand[]>([]);
     const [submissions, setSubmissions] = useState(initialMockSubmissions);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setIsLoading(true);
-        // Simulate fetching tasks that match creator's skills
-        setTimeout(() => {
-            const openTasks = initialDemands
-                .filter(d => d.status === '开放中' && (d.category === '平面设计' || d.category === '3D建模'))
-                .map(d => ({ id: d.id, title: d.title, budget: d.budget, category: d.category }));
-            setTasks(openTasks);
-            setIsLoading(false);
-        }, 500);
+        async function fetchTasks() {
+            setIsLoading(true);
+            try {
+                const allDemands = await getDemands();
+                // Simulate fetching tasks that match creator's skills
+                const openTasks = allDemands.filter(d => d.status === '开放中' && (d.category === '平面设计' || d.category === '3D建模'));
+                setTasks(openTasks);
+            } catch (error) {
+                console.error("Failed to fetch tasks:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchTasks();
     }, []);
 
     if (role !== 'creator' && role !== 'admin') {
