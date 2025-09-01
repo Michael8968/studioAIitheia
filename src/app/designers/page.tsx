@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { Star, Circle, MessageSquare, Phone, Loader2 } from "lucide-react";
+import { Star, Circle, MessageSquare, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type User, getUsers } from '@/store/auth';
 import { Skeleton } from '@/components/ui/skeleton';

@@ -11,16 +11,13 @@ import { useAuthStore } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDemands, type Demand } from "@/store/demands";
 
-const initialMockSubmissions = [
-    { name: '科幻士兵角色', category: '3D角色', price: '¥8,400', updated: '2024-07-20' },
-    { name: '复古赛车', category: '3D交通工具', price: '¥5,600', updated: '2024-06-15' },
-    { name: '奇幻风格的剑', category: '游戏道具', price: '¥1,050', updated: '2024-05-30' },
-];
+// Removed initialMockSubmissions as it's static data.
+// A real implementation would fetch this from a 'submissions' collection in Firestore.
 
 export default function CreatorWorkbenchPage() {
     const { role } = useAuthStore();
     const [tasks, setTasks] = useState<Demand[]>([]);
-    const [submissions, setSubmissions] = useState(initialMockSubmissions);
+    const [submissions, setSubmissions] = useState<{ name: string; category: string; price: string; updated: string; }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -31,6 +28,14 @@ export default function CreatorWorkbenchPage() {
                 // Simulate fetching tasks that match creator's skills
                 const openTasks = allDemands.filter(d => d.status === '开放中' && (d.category === '平面设计' || d.category === '3D建模'));
                 setTasks(openTasks);
+                
+                // Placeholder for fetching real submissions
+                setSubmissions([
+                    { name: '科幻士兵角色', category: '3D角色', price: '¥8,400', updated: '2024-07-20' },
+                    { name: '复古赛车', category: '3D交通工具', price: '¥5,600', updated: '2024-06-15' },
+                    { name: '奇幻风格的剑', category: '游戏道具', price: '¥1,050', updated: '2024-05-30' },
+                ]);
+
             } catch (error) {
                 console.error("Failed to fetch tasks:", error);
             } finally {
@@ -136,7 +141,13 @@ export default function CreatorWorkbenchPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {submissions.map((submission, index) => (
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="h-24 text-center">
+                                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                                </TableCell>
+                            </TableRow>
+                        ) : submissions.map((submission, index) => (
                             <TableRow key={index}>
                                 <TableCell className="font-medium">{submission.name}</TableCell>
                                 <TableCell>{submission.category}</TableCell>

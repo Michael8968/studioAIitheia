@@ -10,7 +10,7 @@ import { Eye, Edit, Ban, Link } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockApis } from '../public-resources/page';
+import { mockApis } from '@/app/public-resources/page';
 
 type Prompt = {
   id: string;
