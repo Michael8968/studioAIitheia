@@ -35,12 +35,19 @@ function DemandFormDialog({ onAddDemand }: { onAddDemand: (demand: Demand) => vo
   const [category, setCategory] = useState('');
   const [budget, setBudget] = useState('');
   const [description, setDescription] = useState('');
+  const { user } = useAuthStore();
+  const { toast } = useToast();
 
   const handleSubmit = async () => {
-    const newDemandData = { title, category, budget, description };
+    if (!user) {
+        toast({ variant: 'destructive', title: '错误', description: '您必须登录才能发布需求。' });
+        return;
+    }
+    const newDemandData = { title, category, budget, description, authorId: user.id };
     try {
         const newDemand = await addDemand(newDemandData);
         onAddDemand(newDemand);
+        toast({ title: '成功', description: '您的需求已成功发布！' });
         setTitle('');
         setCategory('');
         setBudget('');
@@ -48,6 +55,7 @@ function DemandFormDialog({ onAddDemand }: { onAddDemand: (demand: Demand) => vo
         setOpen(false);
     } catch(error) {
         console.error("Failed to add demand:", error);
+        toast({ variant: 'destructive', title: '发布失败', description: '创建需求时出错，请稍后再试。' });
     }
   };
 

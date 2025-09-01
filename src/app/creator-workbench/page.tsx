@@ -11,13 +11,9 @@ import { useAuthStore } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDemands, type Demand } from "@/store/demands";
 
-// Removed initialMockSubmissions as it's static data.
-// A real implementation would fetch this from a 'submissions' collection in Firestore.
-
 export default function CreatorWorkbenchPage() {
     const { role } = useAuthStore();
     const [tasks, setTasks] = useState<Demand[]>([]);
-    const [submissions, setSubmissions] = useState<{ name: string; category: string; price: string; updated: string; }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -25,16 +21,9 @@ export default function CreatorWorkbenchPage() {
             setIsLoading(true);
             try {
                 const allDemands = await getDemands();
-                // Simulate fetching tasks that match creator's skills
+                // In a real app, this filtering would ideally be done on the backend.
                 const openTasks = allDemands.filter(d => d.status === '开放中' && (d.category === '平面设计' || d.category === '3D建模'));
                 setTasks(openTasks);
-                
-                // Placeholder for fetching real submissions
-                setSubmissions([
-                    { name: '科幻士兵角色', category: '3D角色', price: '¥8,400', updated: '2024-07-20' },
-                    { name: '复古赛车', category: '3D交通工具', price: '¥5,600', updated: '2024-06-15' },
-                    { name: '奇幻风格的剑', category: '游戏道具', price: '¥1,050', updated: '2024-05-30' },
-                ]);
 
             } catch (error) {
                 console.error("Failed to fetch tasks:", error);
@@ -131,32 +120,10 @@ export default function CreatorWorkbenchPage() {
                 <CardDescription>您已提交和已批准作品的列表。</CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>作品名称</TableHead>
-                            <TableHead>类别</TableHead>
-                            <TableHead>价格</TableHead>
-                            <TableHead>最后更新</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
-                                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-                                </TableCell>
-                            </TableRow>
-                        ) : submissions.map((submission, index) => (
-                            <TableRow key={index}>
-                                <TableCell className="font-medium">{submission.name}</TableCell>
-                                <TableCell>{submission.category}</TableCell>
-                                <TableCell>{submission.price}</TableCell>
-                                <TableCell>{submission.updated}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                <div className="text-center py-12 text-muted-foreground">
+                    <p>您还没有任何提交。</p>
+                    <p className="text-xs mt-1">此功能将在未来的更新中从后端加载您的作品数据。</p>
+                </div>
             </CardContent>
           </Card>
         </TabsContent>
