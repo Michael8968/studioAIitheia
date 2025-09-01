@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, Timestamp, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, Timestamp, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 
 export type Demand = {
   id: string;
@@ -88,6 +88,21 @@ export async function addDemand(demandData: Omit<Demand, 'id' | 'created' | 'sta
         return newDemand;
     } catch (error) {
         console.error("Error adding demand to Firestore:", error);
+        throw error;
+    }
+}
+
+/**
+ * Deletes a demand from Firestore.
+ * @param demandId The ID of the demand to delete.
+ * @returns A promise that resolves when the deletion is complete.
+ */
+export async function deleteDemand(demandId: string): Promise<void> {
+    try {
+        const demandDocRef = doc(db, 'demands', demandId);
+        await deleteDoc(demandDocRef);
+    } catch (error) {
+        console.error("Error deleting demand from Firestore:", error);
         throw error;
     }
 }

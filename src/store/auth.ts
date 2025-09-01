@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 
 
 export type Role = 'admin' | 'supplier' | 'user' | 'creator';
@@ -24,7 +24,7 @@ export type User = {
 type AuthState = {
   role: Role | null;
   user: User | null;
-  login: (userId: string, role: Role) => Promise<void>;
+  login: (userId: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -66,8 +66,6 @@ export async function getUsers(): Promise<User[]> {
         return userList;
     } catch (error) {
         console.error("Error fetching users from Firestore:", error);
-        // In a real app, you'd want to handle this error more gracefully.
-        // For now, we return an empty array to prevent the app from crashing.
         return [];
     }
 }
@@ -95,21 +93,55 @@ export async function getUserById(userId: string): Promise<User | null> {
 }
 
 
+/**
+ * Updates a user's data in Firestore.
+ * @param userId The ID of the user to update.
+ * @param data The data to update.
+ * @returns A promise that resolves when the update is complete.
+ */
+export async function updateUser(userId: string, data: Partial<User>): Promise<void> {
+    try {
+        const userDocRef = doc(db, 'users', userId);
+        await updateDoc(userDocRef, data);
+    } catch (error) {
+        console.error("Error updating user in Firestore:", error);
+        throw error;
+    }
+}
+
+/**
+ * Deletes a user from Firestore.
+ * @param userId The ID of the user to delete.
+ * @returns A promise that resolves when the deletion is complete.
+ */
+export async function deleteUser(userId: string): Promise<void> {
+    try {
+        const userDocRef = doc(db, 'users', userId);
+        await deleteDoc(userDocRef);
+    } catch (error) {
+        console.error("Error deleting user from Firestore:", error);
+        throw error;
+    }
+}
+
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       role: null,
       user: null,
-      login: async (userId: string, role: Role) => {
+      login: async (userId: string) => {
         try {
             const userData = await getUserById(userId);
-            if (userData && userData.role === role) {
-              set({ role, user: userData });
+            if (userData) {
+              set({ role: userData.role, user: userData });
             } else {
-              console.error("Login failed: User not found or role mismatch.");
+              console.error("Login failed: User not found.");
+              set({ role: null, user: null });
             }
         } catch (error) {
             console.error("Error during login:", error);
+            set({ role: null, user: null });
         }
       },
       logout: () => set({ role: null, user: null }),

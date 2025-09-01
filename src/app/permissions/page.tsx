@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Star, Save, ShieldBan, ShieldCheck, Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { type Role, type User, getUsers, type UserStatus } from "@/store/auth";
+import { type Role, type User, getUsers, type UserStatus, updateUser, deleteUser } from "@/store/auth";
+import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 
 const statusVariantMap: { [key in UserStatus]: "default" | "secondary" | "destructive" } = {
@@ -22,27 +24,76 @@ const statusVariantMap: { [key in UserStatus]: "default" | "secondary" | "destru
 export default function PermissionsPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingChanges, setPendingChanges] = useState<{ [userId: string]: Partial<User> }>({});
+  const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchUsers() {
+  const fetchUsers = async () => {
       setIsLoading(true);
       try {
         const fetchedUsers = await getUsers();
         setUsers(fetchedUsers);
       } catch (error) {
         console.error("Failed to fetch users:", error);
-        // Here you could show a toast notification
+        toast({ variant: "destructive", title: "加载失败", description: "无法从服务器获取用户列表。" });
       } finally {
         setIsLoading(false);
       }
-    }
+    };
+
+  useEffect(() => {
     fetchUsers();
   }, []);
 
 
-  const handleRoleChange = (userId: string, newRole: Role) => {
-    setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+  const handleFieldChange = (userId: string, field: keyof User, value: any) => {
+    // Update local state for immediate UI feedback
+    setUsers(users.map(u => u.id === userId ? { ...u, [field]: value } : u));
+    // Stage the change for saving
+    setPendingChanges(prev => ({
+        ...prev,
+        [userId]: { ...prev[userId], [field]: value }
+    }));
   };
+
+  const handleSaveChanges = async (userId: string) => {
+    const changes = pendingChanges[userId];
+    if (!changes) return;
+
+    try {
+        await updateUser(userId, changes);
+        toast({ title: "成功", description: "用户数据已更新。" });
+        // Clear pending changes for this user
+        setPendingChanges(prev => {
+            const newChanges = { ...prev };
+            delete newChanges[userId];
+            return newChanges;
+        });
+    } catch (error) {
+        toast({ variant: "destructive", title: "更新失败", description: "无法保存更改，请重试。" });
+        // Optionally, revert local state changes here by refetching
+        fetchUsers();
+    }
+  };
+
+  const handleUpdateStatus = async (userId: string, status: UserStatus) => {
+    try {
+        await updateUser(userId, { status });
+        setUsers(users.map(u => u.id === userId ? { ...u, status } : u));
+        toast({ title: "成功", description: `用户状态已更新为“${status}”。`});
+    } catch(error) {
+        toast({ variant: "destructive", title: "操作失败", description: "无法更新用户状态。" });
+    }
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+      try {
+          await deleteUser(userId);
+          setUsers(users.filter(u => u.id !== userId));
+          toast({ title: "成功", description: "用户已被删除。" });
+      } catch (error) {
+          toast({ variant: "destructive", title: "删除失败", description: "无法删除用户。" });
+      }
+  }
 
   const getAvatar = (role: Role, name: string): string => {
       if (role === 'admin') return 'male administrator';
@@ -97,7 +148,7 @@ export default function PermissionsPage() {
                 </TableRow>
               ) : (
                 users.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow key={user.id} data-state={pendingChanges[user.id] ? "selected" : undefined}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Image src={`https://placehold.co/40x40.png`} alt={user.name} width={40} height={40} className="rounded-full" data-ai-hint={getAvatar(user.role, user.name)} />
@@ -111,7 +162,7 @@ export default function PermissionsPage() {
                       <Badge variant={statusVariantMap[user.status || '正常']} className={(user.status || '正常') === '正常' ? 'bg-green-500' : ''}>{user.status || '正常'}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Select defaultValue={user.role} onValueChange={(newRole) => handleRoleChange(user.id, newRole as Role)} disabled={user.role === 'admin'}>
+                      <Select value={user.role} onValueChange={(newRole) => handleFieldChange(user.id, 'role', newRole as Role)} disabled={user.role === 'admin'}>
                         <SelectTrigger className="w-[120px]">
                           <SelectValue placeholder="选择角色" />
                         </SelectTrigger>
@@ -131,23 +182,44 @@ export default function PermissionsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" disabled={user.role === 'admin'}>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem><Save className="mr-2 h-4 w-4"/> 保存角色</DropdownMenuItem>
-                          {(user.status || '正常') !== '已暂停' ? 
-                              <DropdownMenuItem><ShieldBan className="mr-2 h-4 w-4"/> 暂停用户</DropdownMenuItem>
-                              : <DropdownMenuItem><ShieldCheck className="mr-2 h-4 w-4"/> 重新激活</DropdownMenuItem>
-                          }
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4"/> 删除用户
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                       <AlertDialog>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" disabled={user.role === 'admin'}>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>管理操作</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleSaveChanges(user.id)} disabled={!pendingChanges[user.id]}>
+                                  <Save className="mr-2 h-4 w-4"/> 保存角色
+                              </DropdownMenuItem>
+                               {(user.status || '正常') !== '已暂停' ? 
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, '已暂停')}><ShieldBan className="mr-2 h-4 w-4"/> 暂停用户</DropdownMenuItem>
+                                  : <DropdownMenuItem onClick={() => handleUpdateStatus(user.id, '正常')}><ShieldCheck className="mr-2 h-4 w-4"/> 重新激活</DropdownMenuItem>
+                              }
+                               <DropdownMenuSeparator />
+                               <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                      <Trash2 className="mr-2 h-4 w-4"/> 删除用户
+                                  </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                           <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>您确定要删除此用户吗？</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    此操作无法撤销。这将永久删除用户 <span className="font-bold">{user.name}</span> 的账户并从我们的服务器中删除其数据。
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>取消</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">确认删除</AlertDialogAction>
+                                </AlertDialogFooter>
+                          </AlertDialogContent>
+                       </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))

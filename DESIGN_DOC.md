@@ -47,7 +47,7 @@
 项目采用现代化的三层架构，实现了前后端分离和数据持久化。
 
 *   **前端 (Frontend)**: [Next.js 15.3.3](https://nextjs.org/) (采用 App Router), [React 18.3.1](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [ShadCN/UI](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/)
-*   **后端 (Backend)**: [Genkit](https://firebase.google.com/docs/genkit) (用于AI流程), **Next.js Server Actions** (用于业务逻辑和数据库交互)。
+*   **后端 (Backend)**: [Genkit](https://firebase.google.com/docs/genkit) (用于AI流程), **模拟后端服务层** (`src/store/*.ts` files) (用于业务逻辑和数据库交互)。
 *   **数据库 (Database)**: **Cloud Firestore** (NoSQL 文档数据库)。
 *   **状态管理 (State Management)**:
     *   **客户端状态**: [Zustand](https://zustand-demo.pmnd.rs/) - 用于管理全局UI状态，如认证信息 (`useAuthStore`)。
@@ -72,7 +72,7 @@
 │   ├── hooks/               # 自定义Hooks (e.g., useToast)
 │   ├── lib/                 # 工具函数 (e.g., cn, firebase.ts)
 │   └── store/               # 数据服务层 (与Firestore交互)
-│       ├── auth.ts          # 用户数据获取与认证状态
+│       ├── auth.ts          # 用户数据获取与管理
 │       └── demands.ts       # 需求数据获取与管理
 ├── public/                  # 静态资源
 ├── DESIGN_DOC.md            # 本文档
@@ -127,18 +127,18 @@
 
 ## 5. 核心逻辑与数据流 (Core Logic & Data Flow)
 
-### 5.1. 数据获取
+### 5.1. 数据获取 (Read)
 
 *   前端客户端组件 (Client Components with `'use client'`) 使用 `useEffect` 钩子在组件挂载时，调用 `src/store/` 目录下的数据服务函数 (如 `getUsers()`, `getDemands()`)。
 *   这些服务函数 (`getUsers`, `getDemands`) 内部封装了对 **Firestore SDK** 的调用，以从数据库中异步获取真实数据。
-*   加载状态 (`isLoading`) 被广泛用于在数据返回前显示骨架屏或加载指示器，提升用户体验。所有数据获取操作都应被 `try...catch` 块包裹，以处理潜在的后端错误。
+*   加载状态 (`isLoading`) 被广泛用于在数据返回前显示骨架屏或加载指示器，提升用户体验。所有数据获取操作都应被 `try...catch` 块包裹，以处理潜在的后端错误，并通过 `toast` 组件向用户提供反馈。
 
-### 5.2. 数据修改
+### 5.2. 数据修改 (Write/Update/Delete)
 
-*   **写操作 (创建/更新)**: 用户在UI上执行操作（如发布新需求、保存配置）。
-*   **调用服务函数**: 前端组件调用相应的数据服务函数 (如 `addDemand(...)`)。
-*   **后端处理**: 这些服务函数内部使用 **Firestore SDK** (如 `addDoc`, `updateDoc`) 与数据库进行交互，执行业务逻辑。
-*   **状态更新**: 函数成功返回后，前端组件会重新获取数据或更新其本地状态，以即时反映UI的变化。
+*   **用户操作**: 用户在UI上执行操作（如发布新需求、保存配置、删除用户）。
+*   **调用服务函数**: 前端组件调用相应的数据服务函数 (如 `addDemand(...)`, `updateUser(...)`, `deleteDemand(...)`)。
+*   **后端处理**: 这些服务函数内部使用 **Firestore SDK** (如 `addDoc`, `updateDoc`, `deleteDoc`) 与数据库进行交互，执行业务逻辑。
+*   **状态更新与反馈**: 函数成功返回后，前端组件会更新其本地状态（如从列表中移除已删除的项），以即时反映UI的变化。同时，使用 `toast` 组件向用户确认操作成功或失败。
 
 ---
 

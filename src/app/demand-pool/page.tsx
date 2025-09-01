@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { PlusCircle, Search, ListFilter, Trash2, Milestone, Phone, Send, UserCheck, Bot, Users, Loader2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { PlusCircle, Search, ListFilter, Trash2, Milestone, Phone, Send, UserCheck, Bot, Users, Loader2, MoreHorizontal } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +20,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 import { recommendCreatives, type RecommendCreativesOutput } from '@/ai/flows/recommend-creatives';
 import { useToast } from '@/hooks/use-toast';
-import { getDemands, addDemand, type Demand } from '@/store/demands';
+import { getDemands, addDemand, deleteDemand, type Demand } from '@/store/demands';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 const statusVariantMap: { [key in Demand['status']]: "default" | "secondary" | "destructive" | "outline" } = {
   '开放中': 'default',
@@ -274,6 +276,7 @@ export default function DemandPoolPage() {
   const [isRecDialogOpen, setRecDialogOpen] = useState(false);
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const { toast } = useToast();
   
   useEffect(() => {
     async function fetchData() {
@@ -285,16 +288,28 @@ export default function DemandPoolPage() {
             setDemands(allDemands);
         } catch (error) {
             console.error("Failed to fetch page data:", error);
+             toast({ variant: "destructive", title: "加载失败", description: "无法从服务器获取页面数据。" });
         } finally {
             setIsLoading(false);
         }
     }
     fetchData();
-  }, []);
+  }, [toast]);
 
   const handleAddDemand = (newDemand: Demand) => {
     setDemands(prev => [newDemand, ...prev]);
   };
+  
+  const handleDeleteDemand = async (demandId: string) => {
+    try {
+      await deleteDemand(demandId);
+      setDemands(prev => prev.filter(d => d.id !== demandId));
+      toast({ title: "成功", description: "需求已成功删除。" });
+    } catch (error) {
+      console.error("Failed to delete demand:", error);
+      toast({ variant: "destructive", title: "删除失败", description: "无法删除该需求，请稍后再试。" });
+    }
+  }
 
 
   const handleRecommendClick = (demand: Demand) => {
@@ -415,12 +430,38 @@ export default function DemandPoolPage() {
                         <TableCell>{demand.created}</TableCell>
                         <TableCell className="text-right space-x-1">
                           {role === 'admin' && (
-                            <>
-                                <Button variant="outline" size="sm" onClick={() => handleRecommendClick(demand)}>
-                                    <Send className="mr-2 h-4 w-4" />推荐
-                                </Button>
-                                <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                            </>
+                            <AlertDialog>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => handleRecommendClick(demand)}>
+                                            <Send className="mr-2 h-4 w-4" />推荐执行者
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                                <Trash2 className="mr-2 h-4 w-4"/> 删除需求
+                                            </DropdownMenuItem>
+                                        </AlertDialogTrigger>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>您确定要删除此需求吗？</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        此操作无法撤销。这将永久删除需求 “<span className="font-bold">{demand.title}</span>”。
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>取消</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteDemand(demand.id)} className="bg-destructive hover:bg-destructive/90">确认删除</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                           )}
                           {(role === 'supplier' || role === 'creator') && demand.status === '开放中' && (
                             <Button variant="outline" size="sm"><Milestone className="mr-2 h-4 w-4" />抢单</Button>
