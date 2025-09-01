@@ -73,6 +73,7 @@ const AIMessage = ({ profile, recommendations, onPublish }: { profile: UserProfi
 const LoadingMessage = () => (
     <div className="flex items-start gap-3">
         <Avatar className="border">
+            <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="bot avatar" />
             <AvatarFallback>AI</AvatarFallback>
         </Avatar>
         <div className="flex flex-col gap-4 w-full max-w-2xl">
@@ -145,7 +146,7 @@ const RecommendationsDisplay = ({ recommendations, onPublish, showPublishButton 
                             <Image
                                 src={item.imageUrl || `https://placehold.co/600x400.png`}
                                 alt={item.name}
-                                layout="fill"
+                                fill
                                 className="object-cover"
                                 data-ai-hint="product photo"
                             />
@@ -248,7 +249,7 @@ function CustomServiceConnector() {
                 {step === 'initial' && (
                      <>
                         <div className="aspect-video bg-muted rounded-lg mb-4 relative overflow-hidden">
-                            <Image src="https://placehold.co/600x400.png" layout="fill" objectFit="cover" alt="定制服务" data-ai-hint="astronaut suit" />
+                            <Image src="https://placehold.co/600x400.png" fill objectFit="cover" alt="定制服务" data-ai-hint="astronaut suit" />
                         </div>
                         <Button className="w-full" onClick={() => setStep('input')}>开始定制</Button>
                     </>
@@ -430,7 +431,10 @@ export function ShoppingAssistant() {
                                 if (index === 0) { // Welcome message
                                     return (
                                         <div key={index} className="flex items-start gap-3">
-                                            <Avatar className="border"><AvatarFallback>AI</AvatarFallback></Avatar>
+                                            <Avatar className="border">
+                                                <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="bot avatar" />
+                                                <AvatarFallback>AI</AvatarFallback>
+                                            </Avatar>
                                             <div className="bg-card rounded-lg p-3 max-w-lg"><p>您好！我是您的专属AI购物助手，请告诉我您在寻找什么？可以描述一下，或者上传一张图片。😊</p></div>
                                         </div>
                                     );
@@ -448,7 +452,7 @@ export function ShoppingAssistant() {
                             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-3">
                                 {imagePreview && (
                                     <div className="relative w-24 h-24">
-                                        <Image src={imagePreview} alt="图片预览" layout="fill" className="rounded-md object-cover" />
+                                        <Image src={imagePreview} alt="图片预览" fill className="rounded-md object-cover" />
                                         <Button
                                             type="button"
                                             variant="destructive"
@@ -510,3 +514,5 @@ export function ShoppingAssistant() {
         </div>
     );
 }
+
+    
