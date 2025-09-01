@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,7 +12,7 @@ import { PlusCircle, Search, ListFilter, Trash2, Milestone, Phone, Send, UserChe
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore, getUsers, type User } from "@/store/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -27,14 +27,6 @@ const mockDemands = [
   { id: 'D003', title: '为一个新奇小工具寻找3D打印原型', description: '一个手持式电子产品的外壳原型，需要高精度打印，材料为ABS或类似强度的塑料。需要提供3D模型文件。', budget: '¥10,000 - ¥17,500', category: '3D建模', status: '开放中', created: '2024-07-25' },
   { id: 'D004', title: '网站专业翻译（中到英）', description: '一个大约5000字的营销网站，内容涉及科技和金融，需要翻译成地道的商务英语。', budget: '¥5,600 - ¥8,400', category: '翻译', status: '已完成', created: '2024-07-15' },
   { id: 'D005', title: '寻找环保包装的供应商', description: '为化妆品系列寻找可持续、可回收的包装解决方案，包括瓶子、罐子和外包装盒。', budget: '可议价', category: '采购', status: '开放中', created: '2024-08-05' },
-];
-
-const mockCreatives = [
-    { id: 'creator-1', name: '爱丽丝', type: 'creator', avatar: 'female creator', specialty: '奇幻与科幻角色设计' },
-    { id: 'creator-2', name: '鲍勃', type: 'creator', avatar: 'male designer', specialty: '建筑可视化' },
-    { id: 'creator-3', name: '查理', type: 'creator', avatar: 'male artist', specialty: '游戏资产' },
-    { id: 'supplier-1', name: '创新科技', type: 'supplier', avatar: 'technology logo', specialty: '高精度3D打印' },
-    { id: 'supplier-2', name: '快速原型公司', type: 'supplier', avatar: 'industrial logo', specialty: 'SLA & FDM 打印' },
 ];
 
 const statusVariantMap: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
@@ -88,11 +80,12 @@ function DemandFormDialog() {
 type RecommendationDialogProps = {
   demand: (typeof mockDemands[0]) | null;
   selectedDemands: (typeof mockDemands[0])[];
+  creatives: User[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: RecommendationDialogProps) {
+function RecommendationDialog({ demand, selectedDemands, creatives, open, onOpenChange }: RecommendationDialogProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [aiResults, setAiResults] = useState<RecommendCreativesOutput | null>(null);
@@ -102,6 +95,13 @@ function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: R
   const title = isBatchMode
     ? `为 ${selectedDemands.length} 个选定的需求推荐执行者`
     : `为需求 “${demand?.title}” 推荐执行者`;
+  
+  const getAvatar = (user: User): string => {
+      if (user.role === 'admin') return 'male administrator';
+      if (user.role === 'supplier') return 'technology logo';
+      if (user.role === 'creator') return 'female creator';
+      return 'user avatar';
+  }
 
   const handleAiRecommend = async () => {
     if (!currentDemand) return;
@@ -114,7 +114,12 @@ function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: R
           description: currentDemand.description,
           category: currentDemand.category,
         },
-        creatives: mockCreatives,
+        creatives: creatives.map(c => ({
+            id: c.id,
+            name: c.name,
+            type: c.role === 'creator' ? 'creator' : 'supplier',
+            specialty: c.specialty || '暂无专长'
+        })),
       });
       setAiResults(result);
     } catch (error) {
@@ -152,16 +157,16 @@ function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: R
               <CardContent>
                 <ScrollArea className="h-72">
                   <div className="space-y-4 pr-4">
-                    {mockCreatives.map((creative) => (
+                    {creatives.map((creative) => (
                       <div key={creative.id} className="flex items-center justify-between rounded-lg border p-3">
                         <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                                <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={creative.avatar} />
+                                <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={getAvatar(creative)} />
                                 <AvatarFallback>{creative.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <div className="font-bold flex items-center">{creative.name} <Badge variant="outline" className="ml-2">{creative.type === 'creator' ? '创意者' : '供应商'}</Badge></div>
-                                <p className="text-xs text-muted-foreground">{creative.specialty}</p>
+                                <div className="font-bold flex items-center">{creative.name} <Badge variant="outline" className="ml-2">{creative.role === 'creator' ? '创意者' : '供应商'}</Badge></div>
+                                <p className="text-xs text-muted-foreground">{creative.specialty || '暂无专长'}</p>
                             </div>
                         </div>
                         <Checkbox id={`creative-${creative.id}`} />
@@ -197,26 +202,30 @@ function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: R
               {aiResults && (
                 <div className="w-full text-left space-y-4">
                   <h3 className="text-xl font-headline text-center mb-4">AI 推荐结果</h3>
-                  {aiResults.recommendations.map(rec => (
-                     <Card key={rec.id} className="bg-background">
-                       <CardHeader className="flex-row items-center justify-between pb-2">
-                          <div className="flex items-center gap-3">
-                             <Avatar className="h-10 w-10">
-                                <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={mockCreatives.find(c => c.id === rec.id)?.avatar} />
-                                <AvatarFallback>{rec.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                             <div>
-                                <p className="font-bold">{rec.name}</p>
-                                <p className="text-xs text-muted-foreground">{mockCreatives.find(c => c.id === rec.id)?.specialty}</p>
-                             </div>
-                          </div>
-                          <Checkbox defaultChecked />
-                       </CardHeader>
-                       <CardContent>
-                          <p className="text-sm text-muted-foreground pl-2 border-l-2 border-primary/50">{rec.reason}</p>
-                       </CardContent>
-                     </Card>
-                  ))}
+                  {aiResults.recommendations.map(rec => {
+                     const creative = creatives.find(c => c.id === rec.id);
+                     if (!creative) return null;
+                     return (
+                         <Card key={rec.id} className="bg-background">
+                           <CardHeader className="flex-row items-center justify-between pb-2">
+                              <div className="flex items-center gap-3">
+                                 <Avatar className="h-10 w-10">
+                                    <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={getAvatar(creative)} />
+                                    <AvatarFallback>{rec.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                 <div>
+                                    <p className="font-bold">{rec.name}</p>
+                                    <p className="text-xs text-muted-foreground">{creative.specialty}</p>
+                                 </div>
+                              </div>
+                              <Checkbox defaultChecked />
+                           </CardHeader>
+                           <CardContent>
+                              <p className="text-sm text-muted-foreground pl-2 border-l-2 border-primary/50">{rec.reason}</p>
+                           </CardContent>
+                         </Card>
+                     )
+                  })}
                    <Button onClick={handleAiRecommend} variant="link" size="sm" className="w-full" disabled={isLoading}>重新生成</Button>
                 </div>
               )}
@@ -235,10 +244,24 @@ function RecommendationDialog({ demand, selectedDemands, open, onOpenChange }: R
 
 export default function DemandPoolPage() {
   const { role } = useAuthStore();
+  const [creatives, setCreatives] = useState<User[]>([]);
   const [isRecDialogOpen, setRecDialogOpen] = useState(false);
   const [selectedDemand, setSelectedDemand] = useState<(typeof mockDemands[0]) | null>(null);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   
+  useEffect(() => {
+    async function fetchCreatives() {
+        try {
+            const allUsers = await getUsers();
+            const creativeUsers = allUsers.filter(user => user.role === 'creator' || user.role === 'supplier');
+            setCreatives(creativeUsers);
+        } catch (error) {
+            console.error("Failed to fetch creatives:", error);
+        }
+    }
+    fetchCreatives();
+  }, []);
+
   const handleRecommendClick = (demand: typeof mockDemands[0]) => {
     setSelectedDemand(demand);
     setSelectedRows([]); // Clear batch selection when opening single
@@ -375,6 +398,7 @@ export default function DemandPoolPage() {
         <RecommendationDialog
           demand={selectedDemand}
           selectedDemands={selectedDemandsForDialog}
+          creatives={creatives}
           open={isRecDialogOpen}
           onOpenChange={setRecDialogOpen}
         />

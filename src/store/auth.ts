@@ -9,7 +9,6 @@ export type User = {
   name: string;
   email: string;
   role: Role;
-  // Creator/Supplier specific fields can be added here later
   specialty?: string; 
 };
 
@@ -35,7 +34,6 @@ const allMockUsers: Record<string, Omit<User, 'id'>> = {
   'creator-3': { name: '查理', email: 'charlie@example.com', role: 'creator', specialty: '游戏资产' },
   'creator-4': { name: '戴安娜', email: 'diana@example.com', role: 'creator', specialty: '动态图形与抽象3D艺术' },
 
-
   // Users
   'user-1': { name: '张伟', email: 'zhang.wei@example.com', role: 'user' },
   'user-2': { name: '陈洁', email: 'chen.jie@example.com', role: 'user' },
@@ -48,14 +46,12 @@ const allMockUsers: Record<string, Omit<User, 'id'>> = {
  * @returns A promise that resolves to an array of all users.
  */
 export async function getUsers(): Promise<User[]> {
-    console.log("Simulating fetching users from the database...");
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
     const usersArray = Object.entries(allMockUsers).map(([id, userData]) => ({
         id,
         ...userData
     }));
-    console.log("Fetched users:", usersArray);
     return usersArray;
 }
 
