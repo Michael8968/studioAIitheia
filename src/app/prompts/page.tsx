@@ -41,13 +41,16 @@ function PromptConfigDialog({ prompt, open, onOpenChange, onSave }: { prompt: Pr
             setIsLoading(true);
             getApis().then(data => {
                 setAvailableApis(data);
+                 if (prompt?.apiEndpoint) {
+                    setSelectedApi(prompt.apiEndpoint);
+                }
             }).catch(() => {
                  toast({ variant: "destructive", title: "错误", description: "无法加载可用API列表" });
             }).finally(() => {
                 setIsLoading(false);
             })
         }
-    }, [open, toast]);
+    }, [open, toast, prompt]);
 
     if (!prompt) return null;
 
