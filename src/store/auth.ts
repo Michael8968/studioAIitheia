@@ -17,13 +17,33 @@ type AuthState = {
   logout: () => void;
 };
 
-// Simplified mock data based on PRD
-const allMockUsers: Record<string, Omit<User, 'role'>> = {
-  'admin-1': { id: 'admin-1', name: '李明', email: 'li.ming@example.com' },
-  'supplier-1': { id: 'supplier-1', name: '创新科技', email: 'contact@chuangxin.tech' },
-  'user-1': { id: 'user-1', name: '张伟', email: 'zhang.wei@example.com' },
-  'creator-1': { id: 'creator-1', name: '王芳', email: 'wang.fang@example.com' },
+// This now acts as our mock database table for users.
+const allMockUsers: Record<string, Omit<User, 'role' | 'id'> & {role: Role}> = {
+  'admin-1': { name: '李明', email: 'li.ming@example.com', role: 'admin' },
+  'supplier-1': { name: '创新科技', email: 'contact@chuangxin.tech', role: 'supplier' },
+  'creator-1': { name: '王芳', email: 'wang.fang@example.com', role: 'creator' },
+  'user-1': { name: '张伟', email: 'zhang.wei@example.com', role: 'user' },
+  'user-2': { name: '陈洁', email: 'chen.jie@example.com', role: 'user' },
 };
+
+
+/**
+ * Simulates fetching all users from a database.
+ * In a real application, this would be a fetch call to a backend API.
+ * @returns A promise that resolves to an array of all users.
+ */
+export async function getUsers(): Promise<User[]> {
+    console.log("Simulating fetching users from the database...");
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const usersArray = Object.entries(allMockUsers).map(([id, userData]) => ({
+        id,
+        ...userData
+    }));
+    console.log("Fetched users:", usersArray);
+    return usersArray;
+}
+
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -31,9 +51,10 @@ export const useAuthStore = create<AuthState>()(
       role: null,
       user: null,
       login: (userId, role) => {
-        const userData = allMockUsers[userId];
+        const userData = Object.entries(allMockUsers).find(([id, _]) => id === userId);
         if (userData) {
-          set({ role, user: { ...userData, role } });
+          const [id, data] = userData;
+          set({ role, user: { id, ...data } });
         }
       },
       logout: () => set({ role: null, user: null }),
