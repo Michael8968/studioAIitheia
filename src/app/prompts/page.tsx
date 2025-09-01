@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -42,6 +43,9 @@ function PromptConfigDialog({ prompt, open, onOpenChange, onSave }: { prompt: Pr
                 setAvailableApis(data);
                  if (prompt?.apiEndpoint) {
                     setSelectedApi(prompt.apiEndpoint);
+                } else if (data.length > 0) {
+                    // Set a default value if no API is selected yet
+                    setSelectedApi(data[0].endpoint);
                 }
             }).catch(() => {
                  toast({ variant: "destructive", title: "错误", description: "无法加载可用API列表" });
@@ -86,7 +90,7 @@ function PromptConfigDialog({ prompt, open, onOpenChange, onSave }: { prompt: Pr
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
-                    <Button onClick={handleSave} disabled={isLoading}>保存配置</Button>
+                    <Button onClick={handleSave} disabled={isLoading || !selectedApi}>保存配置</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

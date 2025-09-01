@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -110,9 +111,12 @@ export default function PublicResourcesPage() {
         }
     }
 
-    fetchLinks();
-    fetchApis();
-  }, [toast]);
+    if (activeTab === 'links') {
+        fetchLinks();
+    } else if (activeTab === 'apis') {
+        fetchApis();
+    }
+  }, [toast, activeTab]);
 
   const handleExport = () => {
     const dataToExport = activeTab === 'links' ? links : apis;

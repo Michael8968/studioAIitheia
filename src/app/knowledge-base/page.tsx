@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -123,6 +124,7 @@ export default function KnowledgeBasePage() {
             });
         } finally {
             setIsSubmitting(false);
+            setFormOpen(false);
         }
     };
 
@@ -209,7 +211,7 @@ export default function KnowledgeBasePage() {
                     <TableCell className="font-medium">{entry.name}</TableCell>
                     <TableCell>{entry.category}</TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 flex-wrap">
                         {entry.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
                       </div>
                     </TableCell>
