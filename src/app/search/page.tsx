@@ -9,17 +9,23 @@ import { Loader2, Search as SearchIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
-const mockResults = [
+type SearchResult = {
+    title: string;
+    description: string;
+    relevance: number;
+}
+
+const initialMockResults: SearchResult[] = [
     { title: '环保T恤供应商', description: '提供经认证的有机棉T恤，可批量订购。', relevance: 95 },
     { title: '赛博朋克3D角色模型', description: '一个带有PBR纹理和完整绑定的游戏可用资产。', relevance: 88 },
     { title: '极简风格Logo设计服务', description: '专为初创公司提供简洁现代的品牌设计。', relevance: 82 },
     { title: '移动应用UI套件', description: '一个用于构建现代iOS和Android应用的综合性Figma UI套件。', relevance: 75 },
 ];
 
-function SearchResultItem({ title, description, relevance }: { title: string, description: string, relevance: number }) {
+function SearchResultItem({ title, description, relevance }: SearchResult) {
     let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "default";
-    if (relevance < 70) badgeVariant = "secondary";
-    if (relevance < 50) badgeVariant = "outline";
+    if (relevance < 90) badgeVariant = "secondary";
+    if (relevance < 80) badgeVariant = "outline";
 
     return (
         <Card>
@@ -39,14 +45,17 @@ function SearchResultItem({ title, description, relevance }: { title: string, de
 export default function SearchPage() {
     const [query, setQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [results, setResults] = useState<any[] | null>(null);
+    const [results, setResults] = useState<SearchResult[] | null>(null);
 
     const handleSearch = () => {
         if (!query) return;
         setIsLoading(true);
         setResults(null);
+        // Simulate an async search operation
         setTimeout(() => {
-            setResults(mockResults);
+            // In a real app, you would filter results based on the query.
+            // Here we just return the mock results for demonstration.
+            setResults(initialMockResults);
             setIsLoading(false);
         }, 1500);
     };

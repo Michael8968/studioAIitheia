@@ -1,21 +1,24 @@
 
 'use client';
 
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModelGenerator } from "@/components/features/model-generator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Milestone, Wand2, Briefcase, FileCheck2 } from "lucide-react";
+import { Milestone, Wand2, Briefcase, FileCheck2, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { initialDemands } from "@/store/demands";
 
-const mockTasks = [
-  { id: 'D001', title: '为新的咖啡品牌设计一个定制logo', budget: '¥3,500 - ¥7,000', category: '平面设计' },
-  { id: 'D003', title: '为一个新奇小工具寻找3D打印原型', budget: '¥10,000 - ¥17,500', category: '3D建模' },
-  { id: 'D005', title: '寻找环保包装的供应商', budget: '可议价', category: '采购' },
-];
+type Task = {
+  id: string;
+  title: string;
+  budget: string;
+  category: string;
+};
 
-const mockSubmissions = [
+const initialMockSubmissions = [
     { name: '科幻士兵角色', category: '3D角色', price: '¥8,400', updated: '2024-07-20' },
     { name: '复古赛车', category: '3D交通工具', price: '¥5,600', updated: '2024-06-15' },
     { name: '奇幻风格的剑', category: '游戏道具', price: '¥1,050', updated: '2024-05-30' },
@@ -23,6 +26,21 @@ const mockSubmissions = [
 
 export default function CreatorWorkbenchPage() {
     const { role } = useAuthStore();
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [submissions, setSubmissions] = useState(initialMockSubmissions);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setIsLoading(true);
+        // Simulate fetching tasks that match creator's skills
+        setTimeout(() => {
+            const openTasks = initialDemands
+                .filter(d => d.status === '开放中' && (d.category === '平面设计' || d.category === '3D建模'))
+                .map(d => ({ id: d.id, title: d.title, budget: d.budget, category: d.category }));
+            setTasks(openTasks);
+            setIsLoading(false);
+        }, 500);
+    }, []);
 
     if (role !== 'creator' && role !== 'admin') {
         return (
@@ -71,7 +89,13 @@ export default function CreatorWorkbenchPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockTasks.map((task) => (
+                  {isLoading ? (
+                    <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center">
+                            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                        </TableCell>
+                    </TableRow>
+                  ) : tasks.map((task) => (
                     <TableRow key={task.id}>
                       <TableCell className="font-medium">{task.title}</TableCell>
                       <TableCell>{task.budget}</TableCell>
@@ -114,7 +138,7 @@ export default function CreatorWorkbenchPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {mockSubmissions.map((submission, index) => (
+                        {submissions.map((submission, index) => (
                             <TableRow key={index}>
                                 <TableCell className="font-medium">{submission.name}</TableCell>
                                 <TableCell>{submission.category}</TableCell>

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -16,7 +16,7 @@ import { Loader2, Image as ImageIcon, Send, Sparkles, Tags, BrainCircuit, CheckC
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '../ui/badge';
-import { useAuthStore } from '@/store/auth';
+import { useAuthStore, getUsers, type User } from '@/store/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '../ui/separator';
 
@@ -192,27 +192,52 @@ type Message = {
     recommendations?: ProductRecommendationsOutput['recommendations'];
 };
 
-
 function CustomServiceConnector() {
     const [step, setStep] = useState<'initial' | 'input' | 'loading' | 'results'>('initial');
     const [demand, setDemand] = useState('');
+    const [designers, setDesigners] = useState<User[]>([]);
+    const [supplier, setSupplier] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleFindMatch = () => {
-        if (!demand) return;
-        setStep('loading');
-        setTimeout(() => {
-            setStep('results');
-        }, 1500); 
+    const getAvatar = (user: User): string => {
+        const role = user.role;
+        const name = user.name;
+        if (role === 'admin') return 'male administrator';
+        if (role === 'supplier') return 'technology logo';
+        if (role === 'creator') {
+            const creatorMap: {[key: string]: string} = {
+                '爱丽丝': 'female creator', '鲍勃': 'male designer', '查理': 'male artist', '戴安娜': 'female artist',
+            }
+            return creatorMap[name] || 'female creator';
+        };
+        return 'user avatar';
     };
 
-    const mockDesigners = [
-        { name: '爱丽丝', specialty: '奇幻与科幻角色设计', avatar: 'female designer' },
-        { name: '查理', specialty: '游戏可用资产与环境', avatar: 'male designer' },
-    ];
+    const handleFindMatch = async () => {
+        if (!demand) return;
+        setIsLoading(true);
+        setStep('loading');
+
+        try {
+            const allUsers = await getUsers();
+            // Simulate matching logic based on demand description
+            const recommendedDesigners = allUsers.filter(u => u.role === 'creator' && u.specialty?.includes('角色'));
+            const recommendedSupplier = allUsers.find(u => u.role === 'supplier' && u.specialty?.includes('3D')) || null;
+            
+            setDesigners(recommendedDesigners);
+            setSupplier(recommendedSupplier);
+
+        } catch (error) {
+            console.error("Failed to fetch users for custom service", error);
+        } finally {
+             // Simulate network delay for effect
+            setTimeout(() => {
+                setIsLoading(false);
+                setStep('results');
+            }, 1500);
+        }
+    };
     
-    const mockSupplier = { name: '创新科技', specialty: '高精度3D打印', avatar: 'technology logo' };
-
-
     return (
         <Card className="shadow-lg">
             <CardHeader>
@@ -237,60 +262,65 @@ function CustomServiceConnector() {
                             value={demand}
                             onChange={(e) => setDemand(e.target.value)}
                         />
-                        <Button className="w-full" onClick={handleFindMatch} disabled={!demand}>寻找匹配</Button>
+                        <Button className="w-full" onClick={handleFindMatch} disabled={!demand || isLoading}>寻找匹配</Button>
                          <Button variant="link" size="sm" className="w-full" onClick={() => setStep('initial')}>返回</Button>
                     </div>
                 )}
 
-                {step === 'loading' && (
+                {(isLoading || step === 'loading') && (
                      <div className="flex flex-col items-center justify-center space-y-4 p-8">
                         <Loader2 className="h-10 w-10 animate-spin text-primary" />
                         <p className="text-muted-foreground">正在为您寻找最佳匹配...</p>
                     </div>
                 )}
 
-                {step === 'results' && (
+                {step === 'results' && !isLoading && (
                     <div className="space-y-6">
-                        <div>
-                            <h4 className="font-semibold mb-3">推荐的创意设计师</h4>
-                            <div className="space-y-4">
-                                {mockDesigners.map(d => (
-                                     <div key={d.name} className="flex items-center justify-between p-3 bg-background rounded-lg">
+                        {designers.length > 0 && (
+                            <div>
+                                <h4 className="font-semibold mb-3">推荐的创意设计师</h4>
+                                <div className="space-y-4">
+                                    {designers.map(d => (
+                                         <div key={d.id} className="flex items-center justify-between p-3 bg-background rounded-lg">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={getAvatar(d)}/>
+                                                    <AvatarFallback>{d.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-bold">{d.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{d.specialty}</p>
+                                                </div>
+                                            </div>
+                                            <Button size="sm" variant="outline"><MessageSquare className="mr-2 h-4 w-4"/> 在线沟通</Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {supplier && (
+                            <>
+                                <Separator />
+                                <div>
+                                    <h4 className="font-semibold mb-3">推荐的供应商</h4>
+                                     <div className="flex items-center justify-between p-3 bg-background rounded-lg">
                                         <div className="flex items-center gap-3">
                                             <Avatar>
-                                                <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={d.avatar}/>
-                                                <AvatarFallback>{d.name.charAt(0)}</AvatarFallback>
+                                                <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={getAvatar(supplier)}/>
+                                                <AvatarFallback>{supplier.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-bold">{d.name}</p>
-                                                <p className="text-xs text-muted-foreground">{d.specialty}</p>
+                                                <p className="font-bold">{supplier.name}</p>
+                                                <p className="text-xs text-muted-foreground">{supplier.specialty}</p>
                                             </div>
                                         </div>
                                         <Button size="sm" variant="outline"><MessageSquare className="mr-2 h-4 w-4"/> 在线沟通</Button>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <Separator />
-
-                        <div>
-                            <h4 className="font-semibold mb-3">推荐的供应商</h4>
-                             <div className="flex items-center justify-between p-3 bg-background rounded-lg">
-                                <div className="flex items-center gap-3">
-                                    <Avatar>
-                                        <AvatarImage src={`https://placehold.co/40x40.png`} data-ai-hint={mockSupplier.avatar}/>
-                                        <AvatarFallback>{mockSupplier.name.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-bold">{mockSupplier.name}</p>
-                                        <p className="text-xs text-muted-foreground">{mockSupplier.specialty}</p>
-                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-2">如果没有合适的设计师，我们推荐此供应商来满足您的需求。</p>
                                 </div>
-                                <Button size="sm" variant="outline"><MessageSquare className="mr-2 h-4 w-4"/> 在线沟通</Button>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-2">如果没有合适的设计师，我们推荐此供应商来满足您的需求。</p>
-                        </div>
+                            </>
+                        )}
                         <Button variant="link" size="sm" className="w-full" onClick={() => setStep('input')}>重新描述需求</Button>
                     </div>
                 )}
