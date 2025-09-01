@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { Star, Circle, MessageSquare, Phone } from "lucide-react";
+import { Star, Circle, MessageSquare, Phone, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type User, getUsers } from '@/store/auth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 function DesignerCardSkeleton() {
     return (
@@ -42,6 +43,7 @@ export default function DesignersPage() {
     const router = useRouter();
     const [designers, setDesigners] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
 
     useEffect(() => {
         async function fetchDesigners() {
@@ -52,13 +54,13 @@ export default function DesignersPage() {
                 setDesigners(creatorUsers);
             } catch (error) {
                 console.error("Failed to fetch designers:", error);
-                // You could add a toast notification here
+                toast({ variant: 'destructive', title: '加载失败', description: '无法从服务器获取设计师列表。' });
             } finally {
                 setIsLoading(false);
             }
         }
         fetchDesigners();
-    }, []);
+    }, [toast]);
 
     const getAvatar = (name: string): string => {
         const nameMap: { [key: string]: string } = {

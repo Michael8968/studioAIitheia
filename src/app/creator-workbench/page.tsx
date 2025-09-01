@@ -10,11 +10,13 @@ import { Milestone, Wand2, Briefcase, FileCheck2, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDemands, type Demand } from "@/store/demands";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CreatorWorkbenchPage() {
-    const { role } = useAuthStore();
+    const { user, role } = useAuthStore();
     const [tasks, setTasks] = useState<Demand[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
 
     useEffect(() => {
         async function fetchTasks() {
@@ -27,12 +29,16 @@ export default function CreatorWorkbenchPage() {
 
             } catch (error) {
                 console.error("Failed to fetch tasks:", error);
+                 toast({ variant: "destructive", title: "加载失败", description: "无法从服务器获取您的任务列表。" });
             } finally {
                 setIsLoading(false);
             }
         }
-        fetchTasks();
-    }, []);
+
+        if (user) {
+            fetchTasks();
+        }
+    }, [user, toast]);
 
     if (role !== 'creator' && role !== 'admin') {
         return (
@@ -87,16 +93,24 @@ export default function CreatorWorkbenchPage() {
                             <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                         </TableCell>
                     </TableRow>
-                  ) : tasks.map((task) => (
-                    <TableRow key={task.id}>
-                      <TableCell className="font-medium">{task.title}</TableCell>
-                      <TableCell>{task.budget}</TableCell>
-                      <TableCell>{task.category}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline"><Milestone className="mr-2 h-4 w-4" /> 接受任务</Button>
-                      </TableCell>
+                  ) : tasks.length > 0 ? (
+                    tasks.map((task) => (
+                        <TableRow key={task.id}>
+                        <TableCell className="font-medium">{task.title}</TableCell>
+                        <TableCell>{task.budget}</TableCell>
+                        <TableCell>{task.category}</TableCell>
+                        <TableCell className="text-right">
+                            <Button variant="outline"><Milestone className="mr-2 h-4 w-4" /> 接受任务</Button>
+                        </TableCell>
+                        </TableRow>
+                    ))
+                  ) : (
+                     <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center">
+                            暂无可接受的任务。
+                        </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
