@@ -29,7 +29,8 @@ export async function getDemands(): Promise<Demand[]> {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 500));
   // Return a copy to prevent direct mutation, sorted by creation date.
-  return [...demandsDB].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+  const sortedDemands = [...demandsDB].sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+  return JSON.parse(JSON.stringify(sortedDemands));
 }
 
 /**
@@ -49,6 +50,6 @@ export async function addDemand(demandData: Omit<Demand, 'id' | 'created' | 'sta
     };
 
     // Prepend to the array to show the newest first
-    demandsDB = [newDemand, ...demandsDB];
-    return newDemand;
+    demandsDB.unshift(newDemand);
+    return JSON.parse(JSON.stringify(newDemand));
 }
