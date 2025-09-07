@@ -1,6 +1,7 @@
 
-import { db } from '@/lib/firebase';
+import { db, isFirestoreConnected } from '@/lib/firebase';
 import { collection, getDocs, addDoc, Timestamp, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { mockDataService } from '@/lib/mock-data';
 
 export type Demand = {
   id: string;
@@ -38,6 +39,11 @@ const mockDemandsForFirestore = [
  */
 export async function getDemands(): Promise<Demand[]> {
     try {
+        if (!isFirestoreConnected) {
+            console.log('使用模拟数据获取需求列表');
+            return await mockDataService.getDemands();
+        }
+
         const demandsCollection = collection(db, 'demands');
         const q = query(demandsCollection, orderBy('created', 'desc'));
         const demandSnapshot = await getDocs(q);
@@ -57,8 +63,8 @@ export async function getDemands(): Promise<Demand[]> {
         
         return demandList;
     } catch (error) {
-        console.error("Error fetching demands from Firestore:", error);
-        return [];
+        console.error("Error fetching demands from Firestore, falling back to mock data:", error);
+        return await mockDataService.getDemands();
     }
 }
 
@@ -69,6 +75,11 @@ export async function getDemands(): Promise<Demand[]> {
  */
 export async function addDemand(demandData: Omit<Demand, 'id' | 'created' | 'status'>): Promise<Demand> {
     try {
+        if (!isFirestoreConnected) {
+            console.log('使用模拟数据添加需求');
+            return await mockDataService.addDemand(demandData);
+        }
+
         const demandsCollection = collection(db, 'demands');
         const newDocData = {
             ...demandData,
@@ -87,8 +98,8 @@ export async function addDemand(demandData: Omit<Demand, 'id' | 'created' | 'sta
         
         return newDemand;
     } catch (error) {
-        console.error("Error adding demand to Firestore:", error);
-        throw error;
+        console.error("Error adding demand to Firestore, falling back to mock data:", error);
+        return await mockDataService.addDemand(demandData);
     }
 }
 

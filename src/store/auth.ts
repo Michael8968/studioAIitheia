@@ -1,8 +1,9 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { db } from '@/lib/firebase';
+import { db, isFirestoreConnected } from '@/lib/firebase';
 import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { mockDataService } from '@/lib/mock-data';
 
 
 export type Role = 'admin' | 'supplier' | 'user' | 'creator';
@@ -60,13 +61,18 @@ const allMockUsersForFirestore = [
  */
 export async function getUsers(): Promise<User[]> {
     try {
+        if (!isFirestoreConnected) {
+            console.log('使用模拟数据获取用户列表');
+            return await mockDataService.getUsers();
+        }
+
         const usersCollection = collection(db, 'users');
         const userSnapshot = await getDocs(usersCollection);
         const userList = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
         return userList;
     } catch (error) {
-        console.error("Error fetching users from Firestore:", error);
-        return [];
+        console.error("Error fetching users from Firestore, falling back to mock data:", error);
+        return await mockDataService.getUsers();
     }
 }
 
@@ -77,6 +83,11 @@ export async function getUsers(): Promise<User[]> {
  */
 export async function getUserById(userId: string): Promise<User | null> {
     try {
+        if (!isFirestoreConnected) {
+            console.log('使用模拟数据获取用户信息');
+            return await mockDataService.getUserById(userId);
+        }
+
         const userDocRef = doc(db, 'users', userId);
         const userDocSnap = await getDoc(userDocRef);
 
@@ -87,8 +98,8 @@ export async function getUserById(userId: string): Promise<User | null> {
             return null;
         }
     } catch (error) {
-        console.error("Error fetching user by ID from Firestore:", error);
-        return null;
+        console.error("Error fetching user by ID from Firestore, falling back to mock data:", error);
+        return await mockDataService.getUserById(userId);
     }
 }
 

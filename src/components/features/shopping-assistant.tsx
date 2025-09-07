@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   description: z.string().min(1, { message: '请输入您要搜索的内容' }),
-  image: z.instanceof(File).optional(),
+  image: z.any().optional(),
 });
 type FormValues = z.infer<typeof formSchema>;
 
